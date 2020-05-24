@@ -1,6 +1,6 @@
 # element-props [![status](https://travis-ci.org/spectjs/element-props.svg?branch=master)](https://travis-ci.org/spectjs/element-props)
 
-Create `props` object for an element, providing unified way to read element attributes/properties.
+Create `props` object for an element, providing normalized way to read element attributes/properties.
 
 [![npm i element-props](https://nodei.co/npm/element-props.png?mini=true)](https://nodei.co/npm/element-props/)
 

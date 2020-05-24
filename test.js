@@ -1,5 +1,8 @@
 import t from 'tst'
 import props from './'
+import { tick } from 'wait-please'
+
+Symbol.observable = Symbol.observable || Symbol('observable')
 
 t('get/set/spread', t => {
   let el = document.createElement('div')
@@ -47,10 +50,22 @@ t('non-attr props', t => {
   t.is({...el.props}, {x: 1, y: 1})
 })
 
-t('observable', t => {
-
+t('observable', async t => {
+  let el = document.createElement('div')
+  let log = []
+  el.props = props(el)
+  el.props[Symbol.observable]().subscribe(props => log.push({...props}))
+  el.props.x = 1
+  t.is(log, [{x:1}])
+  el.setAttribute('y', 2)
+  await tick(2)
+  t.is(log, [{x:1}, {x: 1, y: 2}])
 })
 
 t('async iterable', t => {
+
+})
+
+t('polyfill', t => {
 
 })
