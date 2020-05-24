@@ -14,7 +14,7 @@ export default (el, types) => {
     ownKeys: _ => Array.from(
       new Set(
         Object.keys(el).filter(k => el[k] !== p)
-        .concat(Reflect.ownKeys(_).filter(v => isNaN(Number(v))))
+        .concat(Object.getOwnPropertyNames(_).filter(v => isNaN(Number(v))))
       )
     )
   });

@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "Get props object, reflecting element props",
   "main": "index.js",
+  "module": "index.js",
+  "type": "module",
   "scripts": {
     "start": "es-dev-server --app-index test.html --node-resolve --dedupe",
     "test": "node -r browser-env/register test.js"

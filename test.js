@@ -1,5 +1,5 @@
 import t from 'tst'
-import props from './'
+import props from './index.js'
 import { tick } from 'wait-please'
 
 Symbol.observable = Symbol.observable || Symbol('observable')
