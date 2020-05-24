@@ -23,7 +23,7 @@ el.getAttribute('y') // 'abc'
 
 ## API
 
-### props = elementProps(element, types?)
+### element.props = props(element, types?)
 
 Create properties object `props` for an `element`, with optional `types` defining prop types. Type can be any data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_, or string → data function like _JSON.parse_ etc.
 
@@ -48,14 +48,13 @@ el.props[Symbol.observable]().subscribe(props => console.log(props))
 el.props[Symbol.asyncIterator]()
 ```
 
-Conventions:
+### Conventions
 
 * Element property takes precedence over attribute.
 * `on*` property can only be a function.
 * `style` can only be an object.
 * `id` can only be a string.
 * Empty strings are considered booleans: `<a disabled />` → `a.props.disabled === true`
-* Setting element property directly `el.x = 'y'` does not update `props` nor `attributes` - instead do `props.x = 'y'`.
 
 Internally uses _Proxy_. <!-- with _MutationObserver_ fallback for IE11. -->
 
