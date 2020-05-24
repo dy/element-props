@@ -1,32 +1,11 @@
-const hasProxy = typeof Proxy !== 'undefined'
-
-// auto-parse pkg in a single line (no object/array detection)
-// Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
-const typed = (v,t,n) => v == '' && !t || t === Boolean ? true : t ? t(v) : isNaN(n=Number(v)) ? v : n
-
 export default (el, types) => {
   let a = el.attributes, k
 
   // Array/Object is parsed with JSON.parse
   if (types) for (k in types) if (~[Object, Array].indexOf(types[k])) types[k] = JSON.parse
 
-  // read initial props as attributes
-  // Object.keys(el).map(k => !a[k] && set(el, k, el[k], types ? types[k] : el[k].constructor));
-
-  const get = (_,k) => k in el ? el[k] : a[k] && typed(a[k].value, types && types[k])
-
-  // TODO: IE11
-  // if (!hasProxy) {
-  //   new MutationObserver(l=>l.map(({attributeName:k}) => el[k]=props[k]=get(el,k)))
-  //     .observe(el,{attributes:true})
-  //   Object.defineProperty(el, 'props', {
-  //     get(){ Object.assign(props, {...this}) }
-  //   })
-  //   return props
-  // }
-
   let p = new Proxy(el.attributes, {
-    get,
+    get: (_,k) => k in el ? el[k] : a[k] && typed(a[k].value, types && types[k]),
     set: (_, k, v) => set(el, k, v, types && types[k]),
 
     // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
@@ -42,6 +21,10 @@ export default (el, types) => {
   });
   return p
 }
+
+// auto-parse pkg in a single line (no object/array detection)
+// Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
+const typed = (v,t,n) => v == '' && !t || t === Boolean ? true : t ? t(v) : isNaN(n=Number(v)) ? v : n
 
 const desc = { enumerable: true, configurable: true }, getOwnPropertyDescriptor = () => desc
 
