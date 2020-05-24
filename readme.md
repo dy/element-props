@@ -1,8 +1,8 @@
-# element-props [![Build Status](https://travis-ci.org/spectjs/element-props.svg?branch=master)](https://travis-ci.org/spectjs/element-props)
+# element-props [![status](https://travis-ci.org/spectjs/element-props.svg?branch=master)](https://travis-ci.org/spectjs/element-props)
 
 Create `props` object for an element, providing unified way to read element attributes/properties.
 
-[![npm](https://nodei.co/npm/element-props.png?mini=true)](https://nodei.co/npm/element-props/)
+[![npm i element-props](https://nodei.co/npm/element-props.png?mini=true)](https://nodei.co/npm/element-props/)
 
 ```js
 import props from 'element-props'
@@ -27,7 +27,7 @@ el.y // 'abc'
 
 ### props = elementProps(element, types?)
 
-Create properties object `props` for an `element`, with optional `types` defining prop types. Type can be any data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_ or string → data function like _JSON.parse_ etc.
+Create properties object `props` for an `element`, with optional `types` defining prop types. Type can be any data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_, or string → data function like _JSON.parse_ etc.
 
 ```js
 el.props = props(el, {x:Number, y:Boolean})

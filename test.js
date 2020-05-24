@@ -17,6 +17,20 @@ t('get/set/spread', t => {
   t.is({...el.props}, { x:2, y:'abc', z:'def', id:"1" })
 })
 
+t('propTypes', t => {
+  let el = document.createElement('div')
+
+  el.props = p(el, { x:Number, y:Boolean })
+  el.props.x = '1'
+  el.setAttribute('y', '')
+  el.props.z = 'abc'
+
+  t.is(el.props.x, 1)
+  t.is(el.props.y, true)
+  t.is(el.props.z, 'abc')
+  t.is({...el.props}, {x: 1, y: true, z: 'abc'})
+})
+
 t('observable', t => {
 
 })

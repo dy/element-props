@@ -7,12 +7,12 @@ const Auto = (v,n) => v == '' ? true : isNaN(n=Number(v)) ? v : n
 // const stash = new WeakMap
 
 export default (el, types) => {
-  let a = el.attributes, k
+  let a = el.attributes, k, v
 
   // Array/Object is parsed with JSON.parse
   if (types) for (k in types) if (~[Object, Array].indexOf(types[k])) types[k] = JSON.parse
 
-  const get = (_,k) => k in el ? el[k] : a[k] && (types && types[k] || Auto)(a[k].value)
+  const get = (_,k) => k in el ? el[k] : a[k] && (types && types[k] || Auto)(a[k].value == '' ? true : a[k].value)
 
   // IE11
   // enumerate props
@@ -37,18 +37,19 @@ export default (el, types) => {
 
   return new Proxy(el.attributes, {
     get,
-    set: (_, k, v) => set(el, k, v),
+    set: (_, k, v) => set(el, k, v, types && types[k] || Auto),
     // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
-    getOwnPropertyDescriptor(target, name) {
-      const pd = Reflect.getOwnPropertyDescriptor(target, name)
+    getOwnPropertyDescriptor(target, k) {
+      const pd = Reflect.getOwnPropertyDescriptor(target, k)
+      pd.value = () => get(_, k)
       pd.enumerable = !pd.enumerable
       return pd
     }
   });
 }
 
-const set = (el, k, v) => {
-  el[k] = v
+const set = (el, k, v, type) => {
+  el[k] = type(v)
 
   if (!el.setAttribute) return
 
