@@ -1,8 +1,8 @@
 const hasProxy = typeof Proxy !== 'undefined'
 
-// auto-parse pkg in a single line :) (no object/array detection)
+// auto-parse pkg in a single line (no object/array detection)
 // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
-const Auto = (v,n) => v == '' ? true : isNaN(n=Number(v)) ? v : n
+const typed = (v,t,n) => v == '' && !t || t === Boolean ? true : t ? t(v) : isNaN(n=Number(v)) ? v : n
 
 export default (el, types) => {
   let a = el.attributes, k
@@ -13,7 +13,7 @@ export default (el, types) => {
   // read initial props as attributes
   // Object.keys(el).map(k => !a[k] && set(el, k, el[k], types ? types[k] : el[k].constructor));
 
-  const get = (_,k) => k in el ? el[k] : a[k] && (types && types[k] || Auto)(a[k].value == '' ? true : a[k].value)
+  const get = (_,k) => k in el ? el[k] : a[k] && typed(a[k].value, types && types[k])
 
   // TODO: IE11
   // if (!hasProxy) {
@@ -45,8 +45,8 @@ export default (el, types) => {
 
 const desc = { enumerable: true, configurable: true }, getOwnPropertyDescriptor = () => desc
 
-const set = (el, k, v, type=Auto) => {
-  el[k] = type(v)
+const set = (el, k, v, t) => {
+  el[k] = typed(v, t)
 
   if (!el.setAttribute) return
 
