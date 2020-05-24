@@ -4,51 +4,48 @@ const hasProxy = typeof Proxy !== 'undefined'
 // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
 const Auto = (v,n) => v == '' ? true : isNaN(n=Number(v)) ? v : n
 
-// const stash = new WeakMap
-
 export default (el, types) => {
-  let a = el.attributes, k, v
+  let a = el.attributes, k
 
   // Array/Object is parsed with JSON.parse
   if (types) for (k in types) if (~[Object, Array].indexOf(types[k])) types[k] = JSON.parse
 
+  // read initial props as attributes
+  // Object.keys(el).map(k => !a[k] && set(el, k, el[k], types ? types[k] : el[k].constructor));
+
   const get = (_,k) => k in el ? el[k] : a[k] && (types && types[k] || Auto)(a[k].value == '' ? true : a[k].value)
 
-  // IE11
-  // enumerate props
-  // if (!types) { types = {}; for (a of a) types[a.name] = Auto; Object.keys(el).map(k => types[k] = el[k].constructor); }
+  // TODO: IE11
   // if (!hasProxy) {
-  //   let props = stash.get(el)
-  //   if (!props) {
-  //     props={...el}
-  //     // read existing props
-  //     for (a of a) props[a.name] = get(el,a.name)
-  //     stash.set(el, props)
-  //   }
   //   new MutationObserver(l=>l.map(({attributeName:k}) => el[k]=props[k]=get(el,k)))
   //     .observe(el,{attributes:true})
   //   Object.defineProperty(el, 'props', {
-  //     get(){
-  //       Object.assign(props, {...this})
-  //     }
+  //     get(){ Object.assign(props, {...this}) }
   //   })
   //   return props
   // }
 
-  return new Proxy(el.attributes, {
+  let p = new Proxy(el.attributes, {
     get,
-    set: (_, k, v) => set(el, k, v, types && types[k] || Auto),
+    set: (_, k, v) => set(el, k, v, types && types[k]),
+
     // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
-    getOwnPropertyDescriptor(target, k) {
-      const pd = Reflect.getOwnPropertyDescriptor(target, k)
-      pd.value = () => get(_, k)
-      pd.enumerable = !pd.enumerable
-      return pd
-    }
+    getOwnPropertyDescriptor,
+
+    // joined props from element keys and real attributes
+    ownKeys: _ => Array.from(
+      new Set(
+        Object.keys(el).filter(k => el[k] !== p)
+        .concat(Reflect.ownKeys(_).filter(v => isNaN(Number(v))))
+      )
+    )
   });
+  return p
 }
 
-const set = (el, k, v, type) => {
+const desc = { enumerable: true, configurable: true }, getOwnPropertyDescriptor = () => desc
+
+const set = (el, k, v, type=Auto) => {
   el[k] = type(v)
 
   if (!el.setAttribute) return
