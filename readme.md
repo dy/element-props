@@ -1,0 +1,66 @@
+# element-props [![Build Status](https://travis-ci.org/spectjs/element-props.svg?branch=master)](https://travis-ci.org/spectjs/element-props)
+
+Create `props` object for an element, providing unified way to read element attributes/properties.
+
+[![npm](https://nodei.co/npm/element-props.png?mini=true)](https://nodei.co/npm/element-props/)
+
+```js
+import props from 'element-props'
+
+let el = document.getElementById('my-element')
+el.props = props(el)
+
+el.props.id
+// 'my-element'
+
+el.setAttribute('x', '1')
+el.props.x
+// 1
+
+el.props.y = 'abc'
+{...el.props} // { y: 'abc', x: 1, id: 'my-element' }
+el.getAttribute('y') // 'abc'
+el.y // 'abc'
+```
+
+## API
+
+### props = elementProps(element, types?)
+
+Create properties object `props` for an `element`, with optional `types` defining prop types. Type can be any data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_ or string → data function like _JSON.parse_ etc.
+
+```js
+el.props = props(el, {x:Number, y:Boolean})
+el.props.x = '1'
+el.setAttribute('y', '')
+el.props.z = 'abc'
+
+{...el.props} // {x: 1, y: true, z: 'abc'}
+
+
+// subscribe
+el.props[Symbol.observable]().subscribe(props => console.log(props))
+
+// iterable
+el.props[Symbol.asyncIterator]()
+```
+
+Conventions:
+
+* Element property takes precedence over attribute.
+* `on*` property can only be a function.
+* `style` can only be an object.
+* `id` can only be a string.
+* Empty strings are considered booleans: `<a disabled />` → `a.props.disabled === true`
+* Setting element property directly `el.x = 'y'` does not update `props` nor `attributes` - instead do `props.x = 'y'`.
+
+Internally uses _Proxy_. <!-- with _MutationObserver_ fallback for IE11. -->
+
+Inspired by this [tweet](https://twitter.com/WebReflection/status/1260948278977409026?s=20) with [hint](https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470) from [@hax](https://github.com/hax).
+
+
+## License
+
+ISC © Dmitry Iv.
+
+<p align="center">ॐ</p>
