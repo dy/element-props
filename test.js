@@ -54,18 +54,52 @@ t('observable', async t => {
   let el = document.createElement('div')
   let log = []
   el.props = props(el)
-  el.props[Symbol.observable]().subscribe(props => log.push({...props}))
+  let unsub = el.props[Symbol.observable]().subscribe(props => log.push({...props}))
+  t.is(log, [{}])
   el.props.x = 1
-  t.is(log, [{x:1}])
+  t.is(log, [{}, {x:1}])
   el.setAttribute('y', 2)
   await tick(2)
-  t.is(log, [{x:1}, {x: 1, y: 2}])
+  t.is(log, [{}, {x:1}, {x: 1, y: 2}])
+
+  unsub()
+  el.props.z = 3
+  await tick(3)
+  t.is(log, [{}, { x:1 }, { x: 1, y: 2 }])
+  el.setAttribute('z', 3)
+  await tick(4)
+  t.is(log, [{}, { x:1 }, { x: 1, y: 2 }])
 })
 
-t('async iterable', t => {
+t('async iterable', async t => {
+  let el = document.createElement('div')
+  let log = []
+  el.props = props(el)
 
+  let stop = false
+  ;(async () => { for await (let props of el.props) {
+    if (stop) break
+    log.push({...props})
+  }})()
+
+  await tick(8)
+  t.is(log, [{}])
+
+  el.props.x = 1
+  await tick(4)
+  t.is(log, [{}, {x:1}])
+
+  el.setAttribute('y', 2)
+  await tick(4)
+  t.is(log, [{}, {x:1}, {x:1, y:2}])
+
+  stop = true
+  await tick(4)
+  el.setAttribute('z', 3)
+  await tick(4)
+  t.is(log, [{}, {x:1}, {x:1, y:2}])
 })
 
-t('polyfill', t => {
+t.todo('polyfill', t => {
 
 })

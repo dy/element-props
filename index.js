@@ -1,20 +1,15 @@
-const stash = new WeakMap
+const cached = new WeakMap
 
 export default (el, types) => {
-  if (stash.has(el)) return stash.get(el)
-
-  let a = el.attributes, k
-
-  // Array/Object is parsed with JSON.parse
-  // FIXME: move to `typed`
-  if (types) for (k in types) if (~[Object, Array].indexOf(types[k])) types[k] = JSON.parse
+  if (cached.has(el)) return cached.get(el)
 
   let p = new Proxy(el.attributes, {
     get: (_,k) =>
       k === Symbol.observable ? observable(el) :
-      // k === Symbol.asyncIterator ? asyncIterator(el) :
+      k === Symbol.asyncIterator ? asyncIterable(el) :
       k in el ? el[k] :
-      a[k] && typed(a[k].value, types && types[k]),
+      el.hasAttribute(k) && typed(el.getAttribute(k), types && types[k]),
+
     set: (_, k, v) => set(el, k, v, types && types[k]),
 
     // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
@@ -29,66 +24,17 @@ export default (el, types) => {
     )
   });
 
-  stash.set(el, p)
+  cached.set(el, p)
 
   return p
 }
 
-const observed = new WeakMap()
-
-const observable = el => {
-  return () => ({
-    subscribe(observer) {
-      // MO does not prevent garbage collecting removed node https://dom.spec.whatwg.org/#garbage-collection
-      // FIXME: not sure will the MO itself be collected
-      if (!observed.has(el)) {
-        let mo = new MutationObserver(() => dispatch(el))
-        observed.set(el, mo)
-        mo.observe(el,{ attributes:true })
-      }
-
-      const next = observer.next || observer, handler = e => next(e.detail.props)
-      el.addEventListener('props', handler)
-      return {
-        unsubscribe() { el.removeEventListener('props', handler) }
-      }
-    },
-    [Symbol.observable]() { return this }
-  })
-}
-
-const dispatch = el => el.dispatchEvent(
-  new CustomEvent('props', {
-    detail: {
-      props: stash.get(el)
-    }
-  })
-)
-
-// const ai = el => {
-//   return () => {
-//     channel.subscribe(null, null, () => stop = true)
-//     let stop
-//     ;(async () => {
-//       try {
-//         for await (source of source) {
-//           if (stop) break
-//           channel.push(map(source))
-//         }
-//       } catch(e) {
-//         error(e)
-//       }
-//     })()
-//   }
-//   unsub = () => stop = true
-//   ;(async () => { for await (target of target) { if (stop) break; fn(target) } })()
-// }
-
 // auto-parse pkg in a single line (no object/array detection)
 // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
-const typed = (v,t,n) => v == '' && !t || t === Boolean ? true : t ? t(v) : isNaN(n=Number(v)) ? v : n
-
-const desc = { enumerable: true, configurable: true }, getOwnPropertyDescriptor = () => desc
+const typed = ( v, t, n ) => (
+  t = t === Object || t === Array ? JSON.parse : t,
+  v == '' && !t || t === Boolean ? true : t ? t(v) : isNaN(n=Number(v)) ? v : n
+)
 
 const set = (el, k, v, t) => {
   el[k] = typed(v, t)
@@ -110,3 +56,44 @@ const set = (el, k, v, t) => {
   dispatch(el)
   return true
 }
+
+const desc = { enumerable: true, configurable: true }, getOwnPropertyDescriptor = () => desc
+
+const observed = new WeakMap
+const observable = el => {
+  return () => ({
+    subscribe(observer) {
+      // MO does not prevent garbage collecting removed node https://dom.spec.whatwg.org/#garbage-collection
+      // FIXME: not sure will the MO itself be collected
+      if (!observed.has(el)) {
+        let mo = new MutationObserver(() => dispatch(el))
+        observed.set(el, mo)
+        mo.observe(el,{ attributes:true })
+      }
+
+      const next = observer.next || observer, handler = e => next(e.detail.props)
+
+      // immediate value
+      next(cached.get(el))
+
+      el.addEventListener('props', handler)
+      const unsubscribe = () => el.removeEventListener('props', handler)
+      return unsubscribe.unsubscribe = unsubscribe
+    },
+    [Symbol.observable]() { return this }
+  })
+}
+
+const asyncIterable = el => {
+  return async function*() {
+    let resolve, buf = [], p = new Promise(r => resolve = r),
+      unsubscribe = cached.get(el)[Symbol.observable]()
+      .subscribe(v => ( buf.push(v), resolve(), p = new Promise(r => resolve = r) ))
+
+    try { while (1) yield* buf.splice(0), await p }
+    catch {}
+    finally { unsubscribe() }
+  }
+}
+
+const dispatch = el => el.dispatchEvent(new CustomEvent('props', { detail: { props: cached.get(el) }}))
