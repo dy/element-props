@@ -22,10 +22,12 @@ el.props.y = false
 el.getAttribute('y') // null
 
 // spread 👌
-{...el.props} // { y: 'abc', x: 1, id: 'my-element' }
+{...el.props} // { y: false, x: 1, id: 'my-element' }
 
 // observe changes
-;(for await (let props of el.props) console.log({...props}))()
+;(async () => {
+  for await (let props of el.props) console.log({...props})
+})()
 
 // or with rxjs/observables + pipes
 el.props |> map(props => console.log(props))
@@ -56,6 +58,17 @@ el.props[Symbol.observable]().subscribe(props => console.log(props))
 
 // async iterable
 for await (const props of el.props) console.log(props)
+```
+
+### polyfill
+
+You can add `props` to all HTML elements by including polyfill for `Element.prototype.props`:
+
+```js
+import 'element-props/polyfill'
+
+document.body.id = 'my-body'
+document.body.props // { id: 'my-body' }
 ```
 
 ### Conventions

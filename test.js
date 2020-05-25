@@ -100,6 +100,36 @@ t('async iterable', async t => {
   t.is(log, [{}, {x:1}, {x:1, y:2}])
 })
 
-t.todo('polyfill', t => {
+t('polyfill', async t => {
+  await import('./polyfill.js')
 
+  let el = document.createElement('div')
+  el.id = 'my-element'
+
+  // preserves value type
+  el.props.x = 1
+  t.is(el.getAttribute('x'), '1')
+  t.is(el.props.x, 1)
+
+  // normalizes boolean attribs
+  el.setAttribute('y', '')
+  t.is(el.props.y, true)
+  el.props.y = false
+  t.is(el.getAttribute('y'), null)
+
+  // spread 👌
+  t.is({...el.props}, { x: 1, y: false, id: 'my-element' })
+
+  // observe changes
+  let log = []
+  ;(async () => {
+    for await (let props of el.props) log.push({...props})
+  })();
+  await tick(4)
+  t.is(log, [{x:1,y:false,id:'my-element'}])
+
+
+
+  document.body.id = 'my-body'
+  t.is({...document.body.props}, { id: 'my-body' })
 })

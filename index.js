@@ -3,7 +3,7 @@ export default (el, pt={}) => {
   // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
   const t = ( v, t ) => (
     t = t === Object || t === Array ? JSON.parse : t,
-    v == '' && t !== String ? true : t ? t(v) : isNaN(t=+v) ? v : t
+    v === '' && t !== String ? true : t ? t(v) : !v || isNaN(+v) ? v : +v
   ),
 
   d = el => el.dispatchEvent(new CustomEvent('props')),
