@@ -62,7 +62,7 @@ for await (const props of el.props) console.log(props)
 
 ### polyfill
 
-You can add `props` to all HTML elements by including polyfill for `Element.prototype.props`:
+Add `props` to all HTML elements by including polyfill for `Element.prototype.props`:
 
 ```js
 import 'element-props/polyfill'
