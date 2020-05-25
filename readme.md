@@ -16,10 +16,10 @@ el.getAttribute('x') // '1'
 el.props.x // 1
 
 // normalizes boolean attribs
-el.props.y = true
-el.getAttribute('y') // ''
-el.removeAttribute('y')
-el.props.y // false
+el.setAttribute('y', '')
+el.props.y // true
+el.props.y = false
+el.getAttribute('y') // null
 
 // spread 👌
 {...el.props} // { y: 'abc', x: 1, id: 'my-element' }
