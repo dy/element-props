@@ -1,68 +1,56 @@
-export default (el, types) => {
-  let a = el.attributes, p = new Proxy(a, {
-    get: (_,k) =>
-      k === Symbol.observable ? observable(el, p) :
-      k === Symbol.asyncIterator ? asyncIterator(el, p) :
-      k in el ? el[k] :
-      a[k] && typed(a[k].value, types && types[k]),
+export default (el, pt={}, p,
+  // auto-parse pkg in 2 lines (no object/array detection)
+  // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
+  t = ( v, t ) => (
+    t = t === Object || t === Array ? JSON.parse : t,
+    v == '' && t !== String ? true : t ? t(v) : isNaN(t=Number(v)) ? v : t
+  ),
 
-    set: (_, k, v) => {
-      el[k] = typed(v, types && types[k])
+  d = el => el.dispatchEvent(new CustomEvent('props')),
 
-      if (v === false || v == null) el.removeAttribute(k)
-      else el.setAttribute(k,
-        v === true ? '' :
-        typeof v === 'number' || typeof v === 'string' ? v :
-        k === 'class' && Array.isArray(v) ? v.filter(Boolean).join(' ') :
-        k === 'style' && v.constructor === Object ?
-          (k=v,v=Object.values(v),Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')) :
-        ''
-      )
-      dispatch(el, p)
+  // define symbols on attributes
+  a = Object.assign(el.attributes, {
+    async *[Symbol.asyncIterator]() {
+      let resolve, buf = [], p = new Promise(r => resolve = r),
+        unsub = a[Symbol.observable]().subscribe(v => ( buf.push(v), resolve(), p = new Promise(r => resolve = r) ))
 
-      return true
+      try { while (1) yield* buf.splice(0), await p }
+      catch {}
+      finally { unsub() }
     },
+    // polyfill observable symbol
+    [Symbol.observable||(Symbol.observable=Symbol('observable'))]: () => ({
+        // MO does not prevent garbage collecting removed node https://dom.spec.whatwg.org/#garbage-collection
+      subscribe:(n, mo=new MutationObserver(() => d(el)), u=()=>(el.removeEventListener('props', n), mo.disconnect())) => (
+        mo.observe(el, {attributes:true}),
+        (n=(n.next||n).bind(null, p))(),
+        el.addEventListener('props', n),
+        u.unsubscribe = u
+      ),
+      [Symbol.observable]() { return this }
+    })
+  })
+) => p = new Proxy(a, {
+  get: (_,k) => k in el ? el[k] : a[k] && (a[k].call ? a[k] : t(a[k].value, pt[k])),
+  set: (_, k, v) => (
+    el[k] = t(v, pt[k]),
+    v === false || v == null ? el.removeAttribute(k) :
+    el.setAttribute(k,
+      v === true ? '' :
+      typeof v === 'number' || typeof v === 'string' ? v :
+      k === 'class' && Array.isArray(v) ? v.filter(Boolean).join(' ') :
+      k === 'style' && v.constructor === Object ?
+        (k=v,v=Object.values(v),Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')) :
+      ''
+    ),
+    d(el)
+  ),
 
-    // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
-    getOwnPropertyDescriptor: _ => desc,
+  // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
+  getOwnPropertyDescriptor: _ => ({ enumerable: true, configurable: true }),
 
-    // joined props from element keys and real attributes
-    ownKeys: _ => Array.from(
-      new Set([...Object.keys(el), ...Object.getOwnPropertyNames(a)].filter(k => el[k] !== p && isNaN(+k)))
-    )
-  });
-
-  return p
-}
-
-const desc = { enumerable: true, configurable: true }
-
-// auto-parse pkg in 2 lines (no object/array detection)
-// Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
-const typed = ( v, t ) => (
-  t = t === Object || t === Array ? JSON.parse : t,
-  v == '' && t !== String ? true : t ? t(v) : isNaN(t=+v) ? v : t
-)
-
-const observable = (el, props) => () => ({
-  subscribe(next) {
-    // MO does not prevent garbage collecting removed node https://dom.spec.whatwg.org/#garbage-collection
-    const mo = new MutationObserver(() => dispatch(el, props)),
-      unsub = () => (el.removeEventListener('props', next), mo.disconnect())
-
-    mo.observe(el,{ attributes:true }), (next=(next.next||next).bind(null,props))(), el.addEventListener('props', next)
-    return unsub.unsubscribe = unsub
-  },
-  [Symbol.observable]() { return this }
+  // joined props from element keys and real attributes
+  ownKeys: _ => Array.from(
+    new Set([...Object.keys(el), ...Object.getOwnPropertyNames(a)].filter(k => el[k] !== p && isNaN(Number(k))))
+  )
 })
-
-const asyncIterator = (el, props) => async function*() {
-  let resolve, buf = [], p = new Promise(r => resolve = r),
-    unsub = props[Symbol.observable]().subscribe(v => ( buf.push(v), resolve(), p = new Promise(r => resolve = r) ))
-
-  try { while (1) yield* buf.splice(0), await p }
-  catch {}
-  finally { unsub() }
-}
-
-const dispatch = (el, props) => el.dispatchEvent(new CustomEvent('props', { detail: { props }}))
