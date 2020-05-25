@@ -2,6 +2,12 @@
 
 Create `props` object for an element, providing normalized way to read element attributes/properties.
 
+- Preserves value type
+- Normalizes boolean attribs
+- Custom prop types
+- Spread :ok_hand:
+- Observable, asyncIterable
+
 [![npm i element-props](https://nodei.co/npm/element-props.png?mini=true)](https://nodei.co/npm/element-props/)
 
 ```js
