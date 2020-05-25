@@ -1,5 +1,5 @@
 {
-  "name": "element-props",
+  "name": "el-props",
   "version": "1.2.1",
   "description": "Normalize access to element attributes/properties",
   "main": "index.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/spectjs/element-props.git"
+    "url": "git+https://github.com/spectjs/el-props.git"
   },
   "keywords": [
     "element",
@@ -22,9 +22,9 @@
   "author": "dy",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/spectjs/element-props/issues"
+    "url": "https://github.com/spectjs/el-props/issues"
   },
-  "homepage": "https://github.com/spectjs/element-props#readme",
+  "homepage": "https://github.com/spectjs/el-props#readme",
   "devDependencies": {
     "browser-env": "^3.3.0",
     "es-dev-server": "^1.50.7",

@@ -1,11 +1,11 @@
-# element-props [![status](https://travis-ci.org/spectjs/element-props.svg?branch=master)](https://travis-ci.org/spectjs/element-props) [![size](https://img.shields.io/bundlephobia/minzip/element-props?label=size)](https://bundlephobia.com/result?p=element-props)
+# el-props [![status](https://travis-ci.org/spectjs/el-props.svg?branch=master)](https://travis-ci.org/spectjs/el-props) [![size](https://img.shields.io/bundlephobia/minzip/el-props?label=size)](https://bundlephobia.com/result?p=el-props)
 
 Create `props` object for an element, normalizing access to element attributes/properties.
 
-[![npm i element-props](https://nodei.co/npm/element-props.png?mini=true)](https://nodei.co/npm/element-props/)
+[![npm i el-props](https://nodei.co/npm/el-props.png?mini=true)](https://nodei.co/npm/el-props/)
 
 ```js
-import props from 'element-props'
+import props from 'el-props'
 
 let el = document.getElementById('my-element')
 el.props = props(el, { z: Number })
@@ -65,7 +65,7 @@ for await (const props of el.props) console.log(props)
 Add `props` to all HTML elements by including polyfill for `Element.prototype.props`:
 
 ```js
-import 'element-props/polyfill'
+import 'el-props/polyfill'
 
 document.body.id = 'my-body'
 document.body.props // { id: 'my-body' }
