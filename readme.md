@@ -79,7 +79,7 @@ document.body.props // { id: 'my-body' }
 * `id` can only be a string.
 * Empty strings are considered booleans: `<a disabled />` → `a.props.disabled === true`
 
-Internally uses _Proxy_, IE11 support suffers. <!-- with _MutationObserver_ fallback for IE11. -->
+Internally uses _Proxy_, (no IE11 support, but in theory possible with  _MutationObserver_ fallback)
 
 Inspired by this [tweet](https://twitter.com/WebReflection/status/1260948278977409026?s=20) with spreading [hint](https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470).
 
