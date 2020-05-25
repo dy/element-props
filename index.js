@@ -1,3 +1,5 @@
+const observers = new WeakMap
+
 export default (el, pt={}) => {
   // auto-parse pkg in 2 lines (no object/array detection)
   // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
@@ -22,12 +24,23 @@ export default (el, pt={}) => {
     // polyfill observable symbol
     [Symbol.observable||(Symbol.observable=Symbol('observable'))]: () => ({
         // MO does not prevent garbage collecting removed node https://dom.spec.whatwg.org/#garbage-collection
-      subscribe:(n, mo=new MutationObserver(() => d(el)), u=()=>(el.removeEventListener('props', n), mo.disconnect())) => (
-        mo.observe(el, {attributes:true}),
-        (n=(n.next||n).bind(null, p))(),
-        el.addEventListener('props', n),
-        u.unsubscribe = u
-      ),
+      subscribe: next => {
+        let mo = observers.get(el),
+            unsub =() => {
+              el.removeEventListener('props', next)
+              if (!--mo.count) mo.disconnect(), observers.delete(el)
+            }
+
+        if (!mo) {
+          observers.set(el, mo = new MutationObserver(() => d(el)))
+          mo.observe(el, {attributes:true})
+          mo.count = 1
+        } else mo.count++
+
+        (next=(next.next||next).bind(null, p))()
+        el.addEventListener('props', next)
+        return unsub.unsubscribe = unsub
+      },
       [Symbol.observable]() { return this }
     })
   }),

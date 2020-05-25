@@ -71,6 +71,28 @@ t('observable', async t => {
   t.is(log, [{}, { x:1 }, { x: 1, y: 2 }])
 })
 
+t('multiple observables do not create multiple events', async t => {
+  let el = document.createElement('div')
+  let log = []
+  el.props = props(el)
+  let unsub1 = el.props[Symbol.observable]().subscribe(props => log.push({...props}))
+  let unsub2 = el.props[Symbol.observable]().subscribe(props => log.push({...props}))
+  t.is(log, [{},{}])
+  el.setAttribute('x',1)
+  await tick(8)
+  t.is(log, [{},{},{x:1},{x:1}])
+
+  unsub1()
+  el.setAttribute('x',2)
+  await tick(8)
+  t.is(log, [{},{},{x:1},{x:1},{x:2}])
+
+  unsub2()
+  el.setAttribute('x',3)
+  await tick(8)
+  t.is(log, [{},{},{x:1},{x:1},{x:2}])
+})
+
 t('async iterable', async t => {
   let el = document.createElement('div')
   let log = []
