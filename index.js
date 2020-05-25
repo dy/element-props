@@ -47,6 +47,8 @@ export default (el, pt={}) => {
       d(el)
     ),
 
+    deleteProperty:(a,k) => (el.removeAttribute(k),delete el[k]),
+
     // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
     getOwnPropertyDescriptor: _ => ({ enumerable: true, configurable: true }),
 

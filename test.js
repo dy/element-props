@@ -100,6 +100,15 @@ t('async iterable', async t => {
   t.is(log, [{}, {x:1}, {x:1, y:2}])
 })
 
+t('delete prop', t => {
+  let el = document.createElement('div')
+  el.props = props(el)
+  el.props.x = 1
+  t.is(el.props.x, 1)
+  delete el.props.x
+  t.is(el.props.x, undefined)
+})
+
 t('polyfill', async t => {
   await import('./polyfill.js')
 
@@ -127,8 +136,6 @@ t('polyfill', async t => {
   })();
   await tick(4)
   t.is(log, [{x:1,y:false,id:'my-element'}])
-
-
 
   document.body.id = 'my-body'
   t.is({...document.body.props}, { id: 'my-body' })
