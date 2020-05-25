@@ -2,29 +2,33 @@
 
 Create `props` object for an element, providing normalized way to read element attributes/properties.
 
-- Preserves value type
-- Normalizes boolean attribs
-- Custom prop types
-- Spread :ok_hand:
-- Observable, asyncIterable
-
 [![npm i element-props](https://nodei.co/npm/element-props.png?mini=true)](https://nodei.co/npm/element-props/)
 
 ```js
 import props from 'element-props'
 
 let el = document.getElementById('my-element')
-el.props = props(el)
+el.props = props(el, { z: Number })
 
-el.props.id
-// 'my-element'
-
-el.setAttribute('x', '1')
+// preserves value type
+el.props.x = 1
+el.getAttribute('x') // '1'
 el.props.x // 1
 
-el.y = 'abc'
+// normalizes boolean attribs
+el.props.y = true
+el.getAttribute('y') // ''
+el.removeAttribute('y')
+el.props.y // false
+
+// spread 👌
 {...el.props} // { y: 'abc', x: 1, id: 'my-element' }
-el.getAttribute('y') // 'abc'
+
+// observe changes
+;(for await (let props of el.props) console.log({...props}))()
+
+// or with rxjs/observables + pipes
+el.props |> map(props => console.log(props))
 ```
 
 ## API
