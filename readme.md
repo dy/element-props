@@ -51,11 +51,11 @@ el.setAttribute('o', '{foo:"bar"}')
 Props also expose _observable_ and _asyncIterator_ interfaces:
 
 ```js
-// subscribe
+// observable
 el.props[Symbol.observable]().subscribe(props => console.log(props))
 
-// iterable
-el.props[Symbol.asyncIterator]()
+// async iterable
+for await (const props of el.props) console.log(props)
 ```
 
 ### Conventions
