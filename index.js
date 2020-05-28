@@ -8,6 +8,8 @@ export default (el, pt={}) => {
     v === '' && t !== String ? true : t ? t(v) : !v || isNaN(+v) ? v : +v
   ),
 
+  proto = el.constructor.prototype,
+
   d = el => el.dispatchEvent(new CustomEvent('props')),
 
   p = new Proxy(
@@ -46,8 +48,11 @@ export default (el, pt={}) => {
   }),
   {
     get: (a, k) => k in el ? el[k] : a[k] && (a[k].call ? a[k] : t(a[k].value, pt[k])),
-    set: (a, k, v) => (
-      el[k] = t(v, pt[k]),
+    set: (a, k, v, desc) => (
+      v = t(v, pt[k]),
+      el[k] !== v &&
+      // avoid readonly props https://jsperf.com/element-own-props-set/1
+      (!(k in proto) || !(desc = Object.getOwnPropertyDescriptor(proto, k)) || desc.set) && (el[k] = v),
       v === false || v == null ? el.removeAttribute(k) :
       typeof v !== 'function' && el.setAttribute(k,
         v === true ? '' :

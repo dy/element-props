@@ -144,6 +144,19 @@ t('set function, get function', t => {
   // t.is(log, [1, 2])
 })
 
+t('readonly attribs', t => {
+  let f = document.createElement('form')
+  f.id = 'x'
+  f.innerHTML = '<button/>'
+  f.firstChild.props = props(f.firstChild)
+  f.firstChild.props.form = 'x'
+  t.is(f.firstChild.form, f)
+})
+
+t.todo('input', t => {
+
+})
+
 t('polyfill', async t => {
   await import('./polyfill.js')
 
@@ -174,13 +187,4 @@ t('polyfill', async t => {
 
   document.body.id = 'my-body'
   t.is({...document.body.props}, { id: 'my-body' })
-})
-
-t.todo('readonly attribs', t => {
-  let f = h`<form id="x"><button form="x"/></form>`
-  t.is(f.firstChild.form, 'x')
-})
-
-t.todo('input', t => {
-
 })
