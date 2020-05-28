@@ -131,6 +131,19 @@ t('delete prop', t => {
   t.is(el.props.x, undefined)
 })
 
+t('set function, get function', t => {
+  let el = document.createElement('a'), log = []
+  el.props = props(el)
+  el.props.onclick = () => log.push(1)
+  el.click()
+  // el.dispatchEvent(new MouseEvent('click'))
+  t.is(log, [1])
+
+  // el.props.onClick = () => log.push(2)
+  // el.click()
+  // t.is(log, [1, 2])
+})
+
 t('polyfill', async t => {
   await import('./polyfill.js')
 
@@ -161,4 +174,13 @@ t('polyfill', async t => {
 
   document.body.id = 'my-body'
   t.is({...document.body.props}, { id: 'my-body' })
+})
+
+t.todo('readonly attribs', t => {
+  let f = h`<form id="x"><button form="x"/></form>`
+  t.is(f.firstChild.form, 'x')
+})
+
+t.todo('input', t => {
+
 })

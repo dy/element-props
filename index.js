@@ -49,7 +49,7 @@ export default (el, pt={}) => {
     set: (a, k, v) => (
       el[k] = t(v, pt[k]),
       v === false || v == null ? el.removeAttribute(k) :
-      el.setAttribute(k,
+      typeof v !== 'function' && el.setAttribute(k,
         v === true ? '' :
         typeof v === 'number' || typeof v === 'string' ? v :
         k === 'class' && Array.isArray(v) ? v.filter(Boolean).join(' ') :
