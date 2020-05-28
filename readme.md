@@ -21,6 +21,9 @@ el.props.y // true
 el.props.y = false
 el.getAttribute('y') // null
 
+// functions 👌
+el.props.onclick = e => action()
+
 // spread 👌
 {...el.props} // { y: false, x: 1, id: 'my-element' }
 
