@@ -1,4 +1,4 @@
-# element-props [![status](https://travis-ci.org/spectjs/element-props.svg?branch=master)](https://travis-ci.org/spectjs/element-props) [![size](https://img.shields.io/bundlephobia/minzip/element-props?label=size)](https://bundlephobia.com/result?p=element-props)
+# element-props [![status](https://travis-ci.org/spectjs/element-props.svg)](https://travis-ci.org/spectjs/element-props) [![size](https://img.shields.io/bundlephobia/minzip/element-props?label=size)](https://bundlephobia.com/result?p=element-props)
 
 Create `props` object for an element, normalizing access to element attributes/properties.
 
