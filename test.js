@@ -241,7 +241,7 @@ t('input: input checkbox', async t => {
   t.is(el.checked, false)
   t.is(el.value, '')
 })
-t('input: input select', async t => {
+t.browser('input: select', async t => {
   let el = document.createElement('select')
   el.innerHTML = '<option value=1 selected>A</option><option value=2>B</option>'
   // document.body.appendChild(el)
@@ -260,6 +260,7 @@ t('input: input select', async t => {
   t.is(el.innerHTML, '<option value="1" selected="">A</option><option value="2">B</option>')
   t.is(el.value, '1')
 
+  // FIXME: broken in jsdom
   el.props.value = null
   t.is(el.value, '')
   t.is(el.props.value, '')
