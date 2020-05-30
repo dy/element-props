@@ -153,9 +153,123 @@ t('readonly attribs', t => {
   t.is(f.firstChild.form, f)
 })
 
-t.todo('input', t => {
+// input
+t.todo('input: play around', async t => {
+  let el = document.createElement('input')
+  document.body.appendChild(el)
+  el.props = props(el)
+  el.props[Symbol.observable]().subscribe(v => console.log(v))
 
+  let cb = document.createElement('input')
+  cb.setAttribute('type', 'checkbox')
+  document.body.appendChild(cb)
+  let bool = i(cb)
+  bool(v => console.log(v))
+
+  let sel = document.createElement('select')
+  sel.innerHTML = `<option value=1>A</option><option value=2>B</option>`
+  document.body.appendChild(sel)
+  let enm = i(sel)
+  enm(v => console.log(v))
 })
+t('input: notifies direct changing value', async t => {
+  let el = document.createElement('input')
+  el.props = props(el)
+  el.value = 0
+  t.is(el.props.value, '0')
+
+  // observer 1
+  let log = []
+  el.props[Symbol.observable]().subscribe(({value}) => log.push(value))
+
+  t.is(log, ['0'], 'initial value notification')
+
+  el.focus()
+  el.dispatchEvent(new Event('focus'))
+  el.value = 1
+  el.dispatchEvent(new Event('change'))
+  await tick()
+  el.value = 2
+  el.dispatchEvent(new Event('change'))
+  await tick()
+  el.value = 3
+  el.dispatchEvent(new Event('change'))
+  el.value = 4
+  el.dispatchEvent(new Event('change'))
+  el.value = 5
+  el.dispatchEvent(new Event('change'))
+  await tick(8)
+  t.is(log.slice(-1), ['5'], 'updates to latest value')
+  t.is(el.props.value, '5')
+
+  el.value = 6
+  el.dispatchEvent(new Event('change'))
+  t.is(el.value, '6', 'reading value')
+  await tick(8)
+  t.is(log.slice(-1), ['6'], 'reading has no side-effects')
+  t.is(el.props.value, '6')
+})
+t('input: get/set', async t => {
+  let el = document.createElement('input')
+  el.props = props(el)
+  el.props.value = 0
+  t.is(el.value, '0', 'set is ok')
+  t.is(el.props.value, '0', 'get is ok')
+  await tick(8)
+  t.is(el.value, '0', 'set is ok')
+  t.is(el.props.value, '0', 'get is ok')
+})
+t('input: input checkbox', async t => {
+  let el = document.createElement('input')
+  el.type = 'checkbox'
+  document.body.appendChild(el)
+  el.props = props(el)
+  t.is(el.props.value, false)
+  t.is(el.checked, false)
+  t.is(el.value, '')
+
+  // NOTE: changing checked does not update value
+  // el.checked = true
+  // el.dispatchEvent(new Event('change'))
+  el.props.value = true
+  t.is(el.props.value, true)
+  t.is(el.checked, true)
+  t.is(el.value, 'on')
+
+  el.props.value = false
+  t.is(el.props.value, false)
+  t.is(el.checked, false)
+  t.is(el.value, '')
+})
+t('input: input select', async t => {
+  let el = document.createElement('select')
+  el.innerHTML = '<option value=1 selected>A</option><option value=2>B</option>'
+  // document.body.appendChild(el)
+  el.props = props(el)
+  t.is(el.props.value, '1')
+  t.is(el.value, '1')
+
+  el.props.value = '2'
+  // el.dispatchEvent(new Event('change'))
+  t.is(el.props.value, '2')
+  t.is(el.value, '2')
+  t.is(el.innerHTML, '<option value="1">A</option><option value="2" selected="">B</option>')
+
+  el.props.value = '1'
+  t.is(el.props.value, '1')
+  t.is(el.innerHTML, '<option value="1" selected="">A</option><option value="2">B</option>')
+  t.is(el.value, '1')
+
+  el.props.value = null
+  t.is(el.value, '')
+  t.is(el.props.value, '')
+  t.is(el.innerHTML, '<option value="1">A</option><option value="2">B</option>')
+  t.is(el.value, '')
+})
+t.todo('input: input radio')
+t.todo('input: input range')
+t.todo('input: input date')
+t.todo('input: input multiselect')
 
 t('polyfill', async t => {
   await import('./polyfill.js')

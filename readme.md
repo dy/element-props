@@ -16,10 +16,10 @@ el.getAttribute('x') // '1'
 el.props.x // 1
 
 // normalizes boolean attribs
-el.setAttribute('y', '')
-el.props.y // true
-el.props.y = false
-el.getAttribute('y') // null
+el.setAttribute('disabled', '')
+el.props.disabled // true
+el.props.disabled = false
+el.getAttribute('disabled') // null
 
 // functions 👌
 el.props.onclick = e => action()
@@ -61,6 +61,19 @@ el.props[Symbol.observable]().subscribe(props => console.log(props))
 
 // async iterable
 for await (const props of el.props) console.log(props)
+```
+
+`props` properly handle input elements as well - _text_, _checkbox_, _select_:
+
+```js
+el.props = document.querySelector('#checkbox')
+el.props.value = true
+
+el.value // 'on'
+el.checked // true
+el.props.value // true
+el.getAttribute('value') // 'on'
+el.getAttribute('checked') // ''
 ```
 
 ### polyfill

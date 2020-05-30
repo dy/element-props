@@ -12,6 +12,19 @@ export default (el, pt={}) => {
 
   d = el => el.dispatchEvent(new CustomEvent('props')),
 
+  // inputs
+  input = el.tagName === 'INPUT' || el.tagName === 'SELECT',
+  iget = input && (el.type === 'checkbox' ? () => el.checked : () => el.value),
+  iset = input && (el.type === 'text' ? value => el.value = (value == null ? '' : value) :
+    el.type === 'checkbox' ? value => (el.value = (value ? 'on' : ''), p.checked = value) :
+    el.type === 'select-one' ? value => (
+      [...el.options].map(el => el.removeAttribute('selected')),
+      el.value = value,
+      el.selectedOptions[0] && el.selectedOptions[0].setAttribute('selected', '')
+    ) :
+    value => el.value = value
+  ),
+
   p = new Proxy(
   // define symbols on attributes
   Object.assign(el.attributes, {
@@ -30,6 +43,7 @@ export default (el, pt={}) => {
         let mo = observers.get(el),
             unsub =() => {
               el.removeEventListener('props', next)
+              el.removeEventListener('change', next)
               if (!--mo.count) mo.disconnect(), observers.delete(el)
             }
 
@@ -41,26 +55,32 @@ export default (el, pt={}) => {
 
         (next=(next.next||next).bind(null, p))()
         el.addEventListener('props', next)
+        el.addEventListener('change', next)
         return unsub.unsubscribe = unsub
       },
       [Symbol.observable]() { return this }
     })
   }),
   {
-    get: (a, k) => k in el ? el[k] : a[k] && (a[k].call ? a[k] : t(a[k].value, pt[k])),
+    get: (a, k) => input && k === 'value' ? iget() :
+      k in el ? el[k] : a[k] && (a[k].call ? a[k] : t(a[k].value, pt[k])),
     set: (a, k, v, desc) => (
-      v = t(v, pt[k]),
-      el[k] !== v &&
-      // avoid readonly props https://jsperf.com/element-own-props-set/1
-      (!(k in proto) || !(desc = Object.getOwnPropertyDescriptor(proto, k)) || desc.set) && (el[k] = v),
-      v === false || v == null ? el.removeAttribute(k) :
-      typeof v !== 'function' && el.setAttribute(k,
-        v === true ? '' :
-        typeof v === 'number' || typeof v === 'string' ? v :
-        k === 'class' && Array.isArray(v) ? v.filter(Boolean).join(' ') :
-        k === 'style' && v.constructor === Object ?
-          (k=v,v=Object.values(v),Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')) :
-        ''
+      // input case
+      input && k === 'value' ? iset(v) :
+      (
+        v = t(v, pt[k]),
+        el[k] !== v &&
+        // avoid readonly props https://jsperf.com/element-own-props-set/1
+        (!(k in proto) || !(desc = Object.getOwnPropertyDescriptor(proto, k)) || desc.set) && (el[k] = v),
+        v === false || v == null ? el.removeAttribute(k) :
+        typeof v !== 'function' && el.setAttribute(k,
+          v === true ? '' :
+          typeof v === 'number' || typeof v === 'string' ? v :
+          k === 'class' && Array.isArray(v) ? v.filter(Boolean).join(' ') :
+          k === 'style' && v.constructor === Object ?
+            (k=v,v=Object.values(v),Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')) :
+          ''
+        )
       ),
       d(el)
     ),
@@ -75,6 +95,8 @@ export default (el, pt={}) => {
       new Set([...Object.keys(el), ...Object.getOwnPropertyNames(a)].filter(k => el[k] !== p && isNaN(+k)))
     )
   })
+
+  if (input) iset(iget())
 
   return p
 }
