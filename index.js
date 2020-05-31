@@ -24,77 +24,75 @@ export default (el, pt={}) => {
     ) :
     value => el.value = value
   ),
+  // MO does not prevent garbage collecting removed node https://dom.spec.whatwg.org/#garbage-collection
+  subscribe = next => {
+    let mo = observers.get(el),
+        unsub =() => {
+          el.removeEventListener('props', next)
+          el.removeEventListener('change', next)
+          if (!--mo.count) mo.disconnect(), observers.delete(el)
+        }
 
+    if (!mo) {
+      observers.set(el, mo = new MutationObserver(() => d(el)))
+      mo.observe(el, {attributes:true})
+      mo.count = 1
+    } else mo.count++
+
+    (next=(next.next||next).bind(null, p))()
+    el.addEventListener('props', next)
+    el.addEventListener('change', next)
+    return unsub.unsubscribe = unsub
+  },
   p = new Proxy(
-  // define symbols on attributes
-  Object.assign(el.attributes, {
-    async *[Symbol.asyncIterator]() {
-      let resolve, buf = [], p = new Promise(r => resolve = r),
-        unsub = this[Symbol.observable]().subscribe(v => ( buf.push(v), resolve(), p = new Promise(r => resolve = r) ))
+    // define symbols on attributes
+    Object.assign(el.attributes, {
+      async *[Symbol.asyncIterator]() {
+        let resolve, buf = [], p = new Promise(r => resolve = r),
+          unsub = this[Symbol.observable]().subscribe(v => ( buf.push(v), resolve(), p = new Promise(r => resolve = r) ))
 
-      try { while (1) yield* buf.splice(0), await p }
-      catch {}
-      finally { unsub() }
-    },
-    // polyfill observable symbol
-    [Symbol.observable||(Symbol.observable=Symbol('observable'))]: () => ({
-        // MO does not prevent garbage collecting removed node https://dom.spec.whatwg.org/#garbage-collection
-      subscribe: next => {
-        let mo = observers.get(el),
-            unsub =() => {
-              el.removeEventListener('props', next)
-              el.removeEventListener('change', next)
-              if (!--mo.count) mo.disconnect(), observers.delete(el)
-            }
-
-        if (!mo) {
-          observers.set(el, mo = new MutationObserver(() => d(el)))
-          mo.observe(el, {attributes:true})
-          mo.count = 1
-        } else mo.count++
-
-        (next=(next.next||next).bind(null, p))()
-        el.addEventListener('props', next)
-        el.addEventListener('change', next)
-        return unsub.unsubscribe = unsub
+        try { while (1) yield* buf.splice(0), await p }
+        catch {}
+        finally { unsub() }
       },
-      [Symbol.observable]() { return this }
-    })
-  }),
-  {
-    get: (a, k) => input && k === 'value' ? iget() :
-      k in el ? el[k] : a[k] && (a[k].call ? a[k] : t(a[k].value, pt[k])),
-    set: (a, k, v, desc) => (
-      // input case
-      input && k === 'value' ? iset(v) :
-      (
-        v = t(v, pt[k]),
-        el[k] !== v &&
-        // avoid readonly props https://jsperf.com/element-own-props-set/1
-        (!(k in proto) || !(desc = Object.getOwnPropertyDescriptor(proto, k)) || desc.set) && (el[k] = v),
-        v === false || v == null ? el.removeAttribute(k) :
-        typeof v !== 'function' && el.setAttribute(k,
-          v === true ? '' :
-          typeof v === 'number' || typeof v === 'string' ? v :
-          k === 'class' && Array.isArray(v) ? v.filter(Boolean).join(' ') :
-          k === 'style' && v.constructor === Object ?
-            (k=v,v=Object.values(v),Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')) :
-          ''
-        )
+      // polyfill observable symbol
+      [Symbol.observable||(Symbol.observable=Symbol('observable'))]: () => ({ subscribe, [Symbol.observable]() { return this }})
+    }),
+    {
+      get: (a, k) => input && k === 'value' ? iget() :
+        k in el ? el[k] : a[k] && (a[k].call ? a[k] : t(a[k].value, pt[k])),
+      set: (a, k, v, desc) => (
+        // input case
+        input && k === 'value' ? iset(v) :
+        (
+          v = t(v, pt[k]),
+          el[k] !== v &&
+          // avoid readonly props https://jsperf.com/element-own-props-set/1
+          (!(k in proto) || !(desc = Object.getOwnPropertyDescriptor(proto, k)) || desc.set) && (el[k] = v),
+          v === false || v == null ? el.removeAttribute(k) :
+          typeof v !== 'function' && el.setAttribute(k,
+            v === true ? '' :
+            typeof v === 'number' || typeof v === 'string' ? v :
+            k === 'class' && Array.isArray(v) ? v.filter(Boolean).join(' ') :
+            k === 'style' && v.constructor === Object ?
+              (k=v,v=Object.values(v),Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')) :
+            ''
+          )
+        ),
+        d(el)
       ),
-      d(el)
-    ),
 
-    deleteProperty:(a,k) => (el.removeAttribute(k),delete el[k]),
+      deleteProperty:(a,k) => (el.removeAttribute(k),delete el[k]),
 
-    // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
-    getOwnPropertyDescriptor: _ => ({ enumerable: true, configurable: true }),
+      // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
+      getOwnPropertyDescriptor: _ => ({ enumerable: true, configurable: true }),
 
-    // joined props from element keys and real attributes
-    ownKeys: a => Array.from(
-      new Set([...Object.keys(el), ...Object.getOwnPropertyNames(a)].filter(k => el[k] !== p && isNaN(+k)))
-    )
-  })
+      // joined props from element keys and real attributes
+      ownKeys: a => Array.from(
+        new Set([...Object.keys(el), ...Object.getOwnPropertyNames(a)].filter(k => el[k] !== p && isNaN(+k)))
+      )
+    }
+  )
 
   if (input) iset(iget())
 
