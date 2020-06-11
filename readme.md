@@ -99,6 +99,9 @@ Internally uses _Proxy_, (no IE11 support, but in theory possible with  _Mutatio
 
 Inspired by this [tweet](https://twitter.com/WebReflection/status/1260948278977409026?s=20) with spreading [hint](https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470).
 
+## See also
+
+* [Element properties proposal](https://github.com/developit/unified-element-properties-proposal)
 
 ## License
 
