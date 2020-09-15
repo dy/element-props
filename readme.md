@@ -32,7 +32,7 @@ el.props.onclick = e => ()
 
 ### element.props = props(element, propTypes?)
 
-Create `props` Proxy for an `element`, with optional `propTypes = { prop: Type }`.
+Create `props` for an `element`, with optional `propTypes = { [prop]: Type }`.<br/>
 _Type_ is a data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_, or `string => data` function like _JSON.parse_.
 
 ```js
@@ -46,17 +46,7 @@ el.setAttribute('o', '{foo:"bar"}')
 {...el.props} // {n: 1, b: true, s: 'abc', o: {foo:'bar'}, a: [1,2,3]}
 ```
 
-Props also expose _observable_ and _asyncIterator_ interfaces:
-
-```js
-// observable
-el.props[Symbol.observable]().subscribe(props => console.log(props))
-
-// async iterable
-for await (const props of el.props) console.log(props)
-```
-
-`props` properly handle input elements as well - _text_, _checkbox_, _select_:
+`props` handle input elements - _text_, _checkbox_, _select_:
 
 ```js
 el.props = document.querySelector('#checkbox')
@@ -82,17 +72,20 @@ document.body.props // { id: 'my-body' }
 
 ### obervable
 
-Observable version of props provides a way to track props changes:
+Observable version of props provides a way to track props changes, exposing _observable_ and _asyncIterator_ interfaces:
 
 ```js
 import 'element-props/observable'
 
-// observe changes
+// observable
+el.props[Symbol.observable]().subscribe(props => console.log(props))
+
+// async iterable
 ;(async () => {
   for await (let props of el.props) console.log({...props})
 })()
 
-// or with rxjs/observables + pipes
+// rxjs/observables + pipes
 el.props |> map(props => console.log(props))
 ```
 
