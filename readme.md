@@ -32,8 +32,8 @@ el.props.onclick = e => ()
 
 ### element.props = props(element, propTypes?)
 
-Create `props` for an `element`, with optional `propTypes = { [prop]: Type }`.<br/>
-_Type_ is a data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_, or `string => data` function like _JSON.parse_.
+Create `props` for an `element`, with optional `propTypes = { propName: Type }`.<br/>
+_Type_ is any data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_, or `string => data` function like _JSON.parse_ (used for _Array_ and _Object_).
 
 ```js
 el.props = props(el, {n:Number, b:Boolean, o:Object, a:Array, s:String, d:Date})
