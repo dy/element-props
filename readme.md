@@ -75,7 +75,9 @@ document.body.props // { id: 'my-body' }
 Observable version of props provides a way to track props changes, exposing _observable_ and _asyncIterator_ interfaces:
 
 ```js
-import 'element-props/observable'
+import props from 'element-props/observable'
+
+el.props = props(el)
 
 // observable
 el.props[Symbol.observable]().subscribe(props => console.log(props))

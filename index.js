@@ -1,5 +1,3 @@
-const observers = new WeakMap
-
 export default (el, pt={}) => {
   // auto-parse pkg in 2 lines (no object/array detection)
   // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
