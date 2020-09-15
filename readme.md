@@ -1,6 +1,6 @@
 # element-props [![status](https://travis-ci.org/spectjs/element-props.svg)](https://travis-ci.org/spectjs/element-props) [![size](https://img.shields.io/bundlephobia/minzip/element-props?label=size)](https://bundlephobia.com/result?p=element-props)
 
-Create `props` object for an element, normalizing access to element attributes/properties.
+`props` for an element, normalizing access to element attributes/properties.
 
 [![npm i element-props](https://nodei.co/npm/element-props.png?mini=true)](https://nodei.co/npm/element-props/)
 
@@ -10,37 +10,30 @@ import props from 'element-props'
 let el = document.getElementById('my-element')
 el.props = props(el, { z: Number })
 
-// preserves value type
+// numeric
 el.props.x = 1
 el.getAttribute('x') // '1'
 el.props.x // 1
 
-// normalizes boolean attribs
+// boolean
 el.setAttribute('disabled', '')
 el.props.disabled // true
 el.props.disabled = false
 el.getAttribute('disabled') // null
 
-// functions 👌
-el.props.onclick = e => action()
+// functions
+el.props.onclick = e => ()
 
-// spread 👌
+// spread
 {...el.props} // { y: false, x: 1, id: 'my-element' }
-
-// observe changes
-;(async () => {
-  for await (let props of el.props) console.log({...props})
-})()
-
-// or with rxjs/observables + pipes
-el.props |> map(props => console.log(props))
 ```
 
 ## API
 
-### element.props = props(element, types?)
+### element.props = props(element, propTypes?)
 
-Create properties object `props` for an `element`, with optional `types` defining prop types. Type can be any data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_, or string → data function like _JSON.parse_.
+Create `props` Proxy for an `element`, with optional `propTypes = { prop: Type }`.
+_Type_ is a data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_, or `string => data` function like _JSON.parse_.
 
 ```js
 el.props = props(el, {n:Number, b:Boolean, o:Object, a:Array, s:String, d:Date})
@@ -85,6 +78,22 @@ import 'element-props/polyfill'
 
 document.body.id = 'my-body'
 document.body.props // { id: 'my-body' }
+```
+
+### obervable
+
+Observable version of props provides a way to track props changes:
+
+```js
+import 'element-props/observable'
+
+// observe changes
+;(async () => {
+  for await (let props of el.props) console.log({...props})
+})()
+
+// or with rxjs/observables + pipes
+el.props |> map(props => console.log(props))
 ```
 
 ### Conventions
