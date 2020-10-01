@@ -50,7 +50,7 @@ t('non-attr props', t => {
   t.is({...el.props}, {x: 1, y: 1})
 })
 
-t('observable', async t => {
+t.skip('observable', async t => {
   let el = document.createElement('div')
   let log = []
   el.props = props(el)
@@ -71,7 +71,7 @@ t('observable', async t => {
   t.is(log, [{}, { x:1 }, { x: 1, y: 2 }])
 })
 
-t('multiple observables do not create multiple events', async t => {
+t.skip('multiple observables do not create multiple events', async t => {
   let el = document.createElement('div')
   let log = []
   el.props = props(el)
@@ -93,7 +93,7 @@ t('multiple observables do not create multiple events', async t => {
   t.is(log, [{},{},{x:1},{x:1},{x:2}])
 })
 
-t('async iterable', async t => {
+t.skip('async iterable', async t => {
   let el = document.createElement('div')
   let log = []
   el.props = props(el)
@@ -172,7 +172,7 @@ t.todo('input: play around', async t => {
   let enm = i(sel)
   enm(v => console.log(v))
 })
-t('input: notifies direct changing value', async t => {
+t.skip('input: notifies direct changing value', async t => {
   let el = document.createElement('input')
   el.props = props(el)
   el.value = 0
@@ -293,12 +293,12 @@ t('polyfill', async t => {
   t.is({...el.props}, { x: 1, y: false, id: 'my-element' })
 
   // observe changes
-  let log = []
-  ;(async () => {
-    for await (let props of el.props) log.push({...props})
-  })();
-  await tick(4)
-  t.is(log, [{x:1,y:false,id:'my-element'}])
+  // let log = []
+  // ;(async () => {
+  //   for await (let props of el.props) log.push({...props})
+  // })();
+  // await tick(4)
+  // t.is(log, [{x:1,y:false,id:'my-element'}])
 
   document.body.id = 'my-body'
   t.is({...document.body.props}, { id: 'my-body' })

@@ -1,3 +1,5 @@
+const observers = new WeakMap
+
 export default (el, pt={}) => {
   // auto-parse pkg in 2 lines (no object/array detection)
   // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
@@ -7,6 +9,8 @@ export default (el, pt={}) => {
   ),
 
   proto = el.constructor.prototype,
+
+  d = el => el.dispatchEvent(new CustomEvent('props')),
 
   // inputs
   input = el.tagName === 'INPUT' || el.tagName === 'SELECT',
@@ -20,8 +24,44 @@ export default (el, pt={}) => {
     ) :
     value => el.value = value
   ),
+  // MO does not prevent garbage collecting removed node https://dom.spec.whatwg.org/#garbage-collection
+  subscribe = next => {
+    let mo = observers.get(el),
+        unsub =() => {
+          el.removeEventListener('props', next)
+          el.removeEventListener('change', next)
+          if (!--mo.count) mo.disconnect(), observers.delete(el)
+        }
+
+    if (!mo) {
+      observers.set(el, mo = new MutationObserver(() => d(el)))
+      mo.observe(el, {attributes:true})
+      mo.count = 1
+    } else mo.count++
+
+    (next=(next.next||next).bind(null, p))()
+    el.addEventListener('props', next)
+    el.addEventListener('change', next)
+    return unsub.unsubscribe = unsub
+  },
+  map = map => {
+    let result = {[Symbol.observable](){}}
+    subscribe(props => result = map(props))
+  },
   p = new Proxy(
-    el.attributes,
+    // define symbols on attributes
+    Object.assign(el.attributes, {
+      async *[Symbol.asyncIterator]() {
+        let resolve, buf = [], p = new Promise(r => resolve = r),
+          unsub = this[Symbol.observable]().subscribe(v => ( buf.push(v), resolve(), p = new Promise(r => resolve = r) ))
+
+        try { while (1) yield* buf.splice(0), await p }
+        catch {}
+        finally { unsub() }
+      },
+      // polyfill observable symbol
+      [Symbol.observable||(Symbol.observable=Symbol('observable'))]: () => ({ subscribe, map, [Symbol.observable]() { return this }})
+    }),
     {
       get: (a, k) =>
         input && k === 'value' ? iget() :
@@ -45,7 +85,7 @@ export default (el, pt={}) => {
             ''
           )
         ),
-        el.dispatchEvent(new CustomEvent('prop'))
+        d(el)
       ),
 
       deleteProperty:(a,k) => (el.removeAttribute(k),delete el[k]),
