@@ -1,8 +1,8 @@
-export default (el, type={}) => {
+export default (el, types={}) => {
   // auto-parse pkg in 2 lines (no object/array detection)
   // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
-  const t = ( v, t ) => (
-    t = t === Object || t === Array ? JSON.parse : t,
+  const typed = ( v, t ) => (
+    t = t === Object ? JSON.parse : t === Array ? s => JSON.parse(s[0]==='['?s:`[${s}]`) : t,
     v === '' && t !== String ? true : t ? t(v) : !v || isNaN(+v) ? v : +v
   ),
 
@@ -27,12 +27,13 @@ export default (el, type={}) => {
       get: (a, k) =>
         input && k === 'value' ? iget() :
         // k === 'children' ? [...el.childNodes] :
-        k in el ? el[k] : a[k] && (a[k].call ? a[k] : t(a[k].value, type[k])),
+        k in el ? el[k] : a[k] && (a[k].call ? a[k] : typed(a[k].value, types[k])),
       set: (a, k, v, desc) => (
         // input case
         input && k === 'value' ? iset(v) :
         (
-          v = t(v, type[k]),
+          k=k.slice(0,2)==='on'?k.toLowerCase():k, // onClick → onclick
+          v = typed(v, types[k]),
           el[k] !== v &&
           // avoid readonly props https://jsperf.com/element-own-props-set/1
           (!(k in proto) || !(desc = Object.getOwnPropertyDescriptor(proto, k)) || desc.set) && (el[k] = v),
@@ -53,9 +54,8 @@ export default (el, type={}) => {
 
       // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
       getOwnPropertyDescriptor: _ => ({ enumerable: true, configurable: true }),
-
-      // joined props from element keys and real attributes
       ownKeys: a => Array.from(
+        // joined props from element keys and real attributes
         new Set([...Object.keys(el), ...Object.getOwnPropertyNames(a)].filter(k => el[k] !== p && isNaN(+k)))
       )
     }
