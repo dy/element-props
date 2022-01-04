@@ -3,9 +3,7 @@ import props from './index.js'
 
 const cache = new WeakMap
 Object.defineProperty(Element.prototype, 'props', {
-  get() {
-    let p = cache.get(this)
-    if (!p) cache.set(this, p = props(this))
-    return p
+  get(p = cache.get(this)) {
+    return p || (cache.set(this, p = props(this)), p)
   }
 })
