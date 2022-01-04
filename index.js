@@ -1,4 +1,4 @@
-export default (el, pt={}) => {
+export default (el, type={}) => {
   // auto-parse pkg in 2 lines (no object/array detection)
   // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
   const t = ( v, t ) => (
@@ -26,12 +26,12 @@ export default (el, pt={}) => {
       get: (a, k) =>
         input && k === 'value' ? iget() :
         // k === 'children' ? [...el.childNodes] :
-        k in el ? el[k] : a[k] && (a[k].call ? a[k] : t(a[k].value, pt[k])),
+        k in el ? el[k] : a[k] && (a[k].call ? a[k] : t(a[k].value, type[k])),
       set: (a, k, v, desc) => (
         // input case
         input && k === 'value' ? iset(v) :
         (
-          v = t(v, pt[k]),
+          v = t(v, type[k]),
           el[k] !== v &&
           // avoid readonly props https://jsperf.com/element-own-props-set/1
           (!(k in proto) || !(desc = Object.getOwnPropertyDescriptor(proto, k)) || desc.set) && (el[k] = v),
