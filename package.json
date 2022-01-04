@@ -2,8 +2,8 @@
   "name": "element-props",
   "version": "1.5.0",
   "description": "Normalize access to element attributes/properties",
-  "main": "index.js",
-  "module": "index.js",
+  "main": "element-props.js",
+  "module": "element-props.js",
   "type": "module",
   "scripts": {
     "build": "rollup element-props.js --file element-props.min.js --format esm --name \"element-props\"",
