@@ -11,12 +11,13 @@ export default (el, type={}) => {
   // inputs
   input = el.tagName === 'INPUT' || el.tagName === 'SELECT',
   iget = input && (el.type === 'checkbox' ? () => el.checked : () => el.value),
-  iset = input && (el.type === 'text' ? value => el.value = (value == null ? '' : value) :
-    el.type === 'checkbox' ? value => (el.value = (value ? 'on' : ''), p.checked = value) :
+  iset = input && (
+    el.type === 'text' ? value => el.value = value == null ? '' : value :
+    el.type === 'checkbox' ? value => (el.value = value ? 'on' : '', p.checked = value) :
     el.type === 'select-one' ? value => (
       [...el.options].map(el => el.removeAttribute('selected')),
       el.value = value,
-      el.selectedOptions[0] && el.selectedOptions[0].setAttribute('selected', '')
+      el.selectedOptions[0]?.setAttribute('selected', '')
     ) :
     value => el.value = value
   ),
@@ -48,7 +49,7 @@ export default (el, type={}) => {
         el.dispatchEvent(new CustomEvent('prop'))
       ),
 
-      deleteProperty:(a,k) => (el.removeAttribute(k),delete el[k]),
+      deleteProperty: (a,k) => (el.removeAttribute(k), delete el[k]),
 
       // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
       getOwnPropertyDescriptor: _ => ({ enumerable: true, configurable: true }),

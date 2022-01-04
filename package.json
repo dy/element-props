@@ -6,7 +6,6 @@
   "module": "index.js",
   "type": "module",
   "scripts": {
-    "start": "es-dev-server --app-index test.html --node-resolve --dedupe",
     "test": "node -r browser-env/register test.js"
   },
   "repository": {
@@ -27,7 +26,6 @@
   "homepage": "https://github.com/spectjs/element-props#readme",
   "devDependencies": {
     "browser-env": "^3.3.0",
-    "es-dev-server": "^1.50.7",
     "tst": "^6.0.2",
     "wait-please": "^3.1.0"
   }
