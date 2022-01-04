@@ -1,11 +1,11 @@
 # element-props [![status](https://travis-ci.org/spectjs/element-props.svg)](https://travis-ci.org/spectjs/element-props) [![size](https://img.shields.io/bundlephobia/minzip/element-props?label=size)](https://bundlephobia.com/result?p=element-props)
 
-`props` for an element, normalizing access to element attributes/properties.
+Normalize access to element attributes/properties.
 
 [![npm i element-props](https://nodei.co/npm/element-props.png?mini=true)](https://nodei.co/npm/element-props/)
 
 ```js
-import props from 'element-props'
+import props from 'element-props.js'
 
 let el = document.getElementById('my-element')
 el.props = props(el, { z: Number })
@@ -40,7 +40,7 @@ el.props = props(el, {n:Number, b:Boolean, o:Object, a:Array, s:String, d:Date})
 el.props.n = '1'
 el.setAttribute('b', '')
 el.s = 'abc'
-el.setAttribute('a', '[1,2,3]')
+el.setAttribute('a', '1,2,3')
 el.setAttribute('o', '{foo:"bar"}')
 
 {...el.props} // {n: 1, b: true, s: 'abc', o: {foo:'bar'}, a: [1,2,3]}
@@ -59,12 +59,14 @@ el.getAttribute('value') // 'on'
 el.getAttribute('checked') // ''
 ```
 
-### polyfill
+One may think it’s bad to augment DOM objects, but in controlled setting, eg. custom elements, that’s totally fine.
 
-Add `props` to all HTML elements by including polyfill for `Element.prototype.props`:
+### augment
+
+Add `props` to all HTML elements by including augment for `Element.prototype.props`:
 
 ```js
-import 'element-props/polyfill'
+import 'element-props/augment.js'
 
 document.body.id = 'my-body'
 document.body.props // { id: 'my-body' }
@@ -75,7 +77,7 @@ document.body.props // { id: 'my-body' }
 Observable version of props provides a way to track props changes, exposing _observable_ and _asyncIterator_ interfaces:
 
 ```js
-import props from 'element-props/observable'
+import props from 'element-props/observable.js'
 
 el.props = props(el)
 
@@ -91,10 +93,11 @@ el.props[Symbol.observable]().subscribe(props => console.log(props))
 el.props |> map(props => console.log(props))
 ```
 
-### Conventions
+### Convention
 
-* Element property takes precedence over attribute.
+* Element property takes precedence over attribute. (meaning?)
 * `on*` property can only be a function.
+* `onEvt` === `onevt`.
 * `style` can only be an object.
 * `id` can only be a string.
 * Empty strings are considered booleans: `<a disabled />` → `a.props.disabled === true`
@@ -106,6 +109,7 @@ Inspired by this [tweet](https://twitter.com/WebReflection/status/12609482789774
 ## See also
 
 * [Element properties proposal](https://github.com/developit/unified-element-properties-proposal)
+* [element-params](https://github.com/spectjs/element-params)
 
 ## License
 
