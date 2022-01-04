@@ -6,6 +6,8 @@
   "module": "index.js",
   "type": "module",
   "scripts": {
+    "build": "rollup element-props.js --file element-props.min.js --format esm --name \"element-props\"",
+    "minify": "terser element-props.min.js -o element-props.min.js --module -c passes=3 -m",
     "test": "node -r browser-env/register test.js"
   },
   "repository": {
@@ -18,7 +20,13 @@
     "proptypes",
     "spectjs"
   ],
-  "author": "dy",
+  "files": [
+    "element-props.js",
+    "element-props.min.js",
+    "observable.js",
+    "augment.js"
+  ],
+  "author": "Dmitry Iv.",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/spectjs/element-props/issues"
@@ -26,6 +34,8 @@
   "homepage": "https://github.com/spectjs/element-props#readme",
   "devDependencies": {
     "browser-env": "^3.3.0",
+    "rollup": "^2.62.0",
+    "terser": "^5.10.0",
     "tst": "^6.0.2",
     "wait-please": "^3.1.0"
   }

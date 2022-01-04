@@ -61,6 +61,7 @@ export default (el, types={}) => {
     }
   )
 
+  // normalize initial input.value
   if (input) iset(iget())
 
   return p
