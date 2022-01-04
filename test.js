@@ -23,19 +23,21 @@ t('get/set/spread', t => {
 t('propTypes', t => {
   let el = document.createElement('div')
 
-  el.props = props(el, {n:Number, b:Boolean, o:Object, a:Array, s:String, d:Date})
+  el.props = props(el, {n:Number, b:Boolean, o:Object, a:Array, s:String, d:Date, a2:Array})
   el.props.n = '1'
   el.setAttribute('b', '')
   el.props.s = 'abc'
   el.setAttribute('a', '[1,2,3]')
   el.props.o = '{"foo":"bar"}'
+  el.setAttribute('a2', '1,2,3')
 
-  t.is({...el.props}, {n: 1, b: true, s: 'abc', o: {foo:'bar'}, a: [1,2,3]})
+  t.is({...el.props}, {n: 1, b: true, s: 'abc', o: {foo:'bar'}, a: [1,2,3], a2: [1,2,3]})
   t.is(el.props.n, 1)
   t.is(el.props.b, true)
   t.is(el.props.s, 'abc')
   t.is(el.props.o, {foo: 'bar'})
   t.is(el.props.a, [1,2,3])
+  t.is(el.props.a2, [1,2,3])
 })
 
 t('non-attr props', t => {
@@ -139,9 +141,9 @@ t('set function, get function', t => {
   // el.dispatchEvent(new MouseEvent('click'))
   t.is(log, [1])
 
-  // el.props.onClick = () => log.push(2)
-  // el.click()
-  // t.is(log, [1, 2])
+  el.props.onClick = () => log.push(2)
+  el.click()
+  t.is(log, [1, 2])
 })
 
 t('readonly attribs', t => {
@@ -272,8 +274,8 @@ t.todo('input: input range')
 t.todo('input: input date')
 t.todo('input: input multiselect')
 
-t('polyfill', async t => {
-  await import('./polyfill.js')
+t('augment', async t => {
+  await import('./augment.js')
 
   let el = document.createElement('div')
   el.id = 'my-element'
