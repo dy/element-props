@@ -52,7 +52,7 @@ t('non-attr props', t => {
   is({...el.props}, {x: 1, y: 1})
 })
 
-t('onchange', async t => {
+t('onchange event', async t => {
   let el = document.createElement('div')
   let log = []
   el.props = props(el, null, (k, v) => console.log(k,v)||log.push({[k]: v}))
@@ -162,6 +162,28 @@ t('readonly attribs', t => {
   f.firstChild.props = props(f.firstChild)
   f.firstChild.props.form = 'x'
   is(f.firstChild.form, f)
+})
+
+t('function', t => {
+  let log = []
+  let el = document.createElement('div')
+  el.props = props(el)
+  el.props.onA = () => {log.push('A')}
+  el.ona()
+
+  is(log, ['A'])
+
+  el.props.onb = () => {log.push('b')}
+  el.onb()
+  is(log, ['A', 'b'])
+
+  el.props.onclick = () => {log.push('click')}
+  el.click()
+  is(log, ['A','b','click'])
+
+  delete el.props.onclick
+  el.click()
+  is(log, ['A','b','click'])
 })
 
 // input

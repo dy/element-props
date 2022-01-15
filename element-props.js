@@ -15,9 +15,9 @@ prop = (el, k, v, desc) => (
     v === true ? '' :
     typeof v === 'number' || typeof v === 'string' ? v :
     k === 'class' && Array.isArray(v) ? v.filter(Boolean).join(' ') :
-    k === 'style' && v.constructor === Object ?
-      (k=v,v=Object.values(v),Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')) :
-    ''
+    k === 'style' && v.constructor === Object && (
+      k=v,v=Object.values(v),Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')
+    )
   )
 )
 
@@ -47,7 +47,7 @@ export default (el, types, onchange) => {
         onchange?.(k, v, a), 1
       ),
 
-      deleteProperty: (a,k) => (el.removeAttribute(k), delete el[k]),
+      deleteProperty: (a,k,u) => (el.removeAttribute(k), el[k]=u, delete el[k]), // events cannot be deleted, but have to be nullified
 
       // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
       getOwnPropertyDescriptor: a => ({ enumerable: true, configurable: true }),
