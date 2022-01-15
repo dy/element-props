@@ -22,14 +22,15 @@ export default (el, types={}) => {
     ) :
     value => el.value = value
   ),
-  p = new Proxy(
-    el.attributes,
+  a = el.attributes,
+  p = new Proxy({},
     {
-      get: (a, k) =>
+      get: (_, k) =>
         input && k === 'value' ? iget() :
         // k === 'children' ? [...el.childNodes] :
         k in el ? el[k] : a[k] && (a[k].call ? a[k] : typed(a[k].value, types[k])),
-      set: (a, k, v, desc) => (
+      set: (_, k, v, desc) => (
+        // prop(el, k, v,)
         // input case
         input && k === 'value' ? iset(v) :
         (
@@ -51,11 +52,11 @@ export default (el, types={}) => {
         el.dispatchEvent(new CustomEvent('prop'))
       ),
 
-      deleteProperty: (a,k) => (el.removeAttribute(k), delete el[k]),
+      deleteProperty: (_,k) => (el.removeAttribute(k), delete el[k]),
 
       // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
       getOwnPropertyDescriptor: _ => ({ enumerable: true, configurable: true }),
-      ownKeys: a => Array.from(
+      ownKeys: _ => Array.from(
         // joined props from element keys and real attributes
         new Set([...Object.keys(el), ...Object.getOwnPropertyNames(a)].filter(k => el[k] !== p && isNaN(+k)))
       )

@@ -111,7 +111,7 @@ Inspired by this [tweet](https://twitter.com/WebReflection/status/12609482789774
 ## See also
 
 * [Element properties proposal](https://github.com/developit/unified-element-properties-proposal)
-* [element-params](https://github.com/spectjs/element-params)
+* [templize](https://github.com/spectjs/templize)
 
 ## License
 
