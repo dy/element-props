@@ -30,13 +30,13 @@ el.props.onclick = e => ()
 
 ## API
 
-### props(element, propTypes?)
+### props(element, propTypes?, onchange?)
 
 Create `props` for an `element`, with optional `propTypes = { propName: Type }`.<br/>
 _Type_ is any data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_, or `string => data` function like _JSON.parse_ (used for _Array_ and _Object_).
 
 ```js
-el.props = props(el, {n:Number, b:Boolean, o:Object, a:Array, s:String, d:Date})
+el.props = props(el, {n:Number, b:Boolean, o:Object, a:Array, s:String, d:Date}, (key, val) => {})
 el.props.n = '1'
 el.setAttribute('b', '')
 el.s = 'abc'
@@ -59,8 +59,6 @@ el.getAttribute('value') // 'on'
 el.getAttribute('checked') // ''
 ```
 
-One may think it’s bad to augment DOM objects, but in controlled setting, eg. custom elements, that’s totally fine.
-
 ### parse(string, Type?)
 
 Convert string value into defined type _or_ detect type automatically (tiny _auto-parse_).
@@ -74,6 +72,16 @@ parse('1,2,3', Array) // [1, 2, 3]
 parse('{ a: 1, b: 2 }', Object) // { a: 1, b: 2}
 ```
 
+### prop(el, key, value)
+
+Set `key` prop/attribute value depending on value type.
+
+* `on*` property can only be a function.
+* `onEvt` === `onevt`.
+* `style` can only be an object.
+* `id` can only be a string.
+* Empty strings are considered booleans: `<a disabled />` → `a.props.disabled === true`
+
 ### polyfill
 
 Add `props` to all HTML elements by including augment for `Element.prototype.props`:
@@ -85,37 +93,7 @@ document.body.id = 'my-body'
 document.body.props // { id: 'my-body' }
 ```
 
-<!--
-### obervable
-
-Observable version of props provides a way to track props changes, exposing _observable_ and _asyncIterator_ interfaces:
-
-```js
-import props from 'element-props/observable.js'
-
-el.props = props(el)
-
-// observable
-el.props[Symbol.observable]().subscribe(props => console.log(props))
-
-// async iterable
-;(async () => {
-  for await (let props of el.props) console.log({...props})
-})()
-
-// rxjs/observables + pipes
-el.props |> map(props => console.log(props))
-```
--->
-
-### Convention
-
-* Element property takes precedence over attribute. (meaning?)
-* `on*` property can only be a function.
-* `onEvt` === `onevt`.
-* `style` can only be an object.
-* `id` can only be a string.
-* Empty strings are considered booleans: `<a disabled />` → `a.props.disabled === true`
+### Design
 
 Internally uses _Proxy_, (no IE11 support, but in theory possible with  _MutationObserver_ fallback)
 

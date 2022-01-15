@@ -52,6 +52,15 @@ t('non-attr props', t => {
   is({...el.props}, {x: 1, y: 1})
 })
 
+t('onchange', async t => {
+  let el = document.createElement('div')
+  let log = []
+  el.props = props(el, null, (k, v) => console.log(k,v)||log.push({[k]: v}))
+  is(log, [])
+  el.props.x = 1
+  is(log, [{x:1}])
+})
+
 t.skip('observable', async t => {
   let el = document.createElement('div')
   let log = []
