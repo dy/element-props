@@ -1,4 +1,4 @@
-# element-props [![status](https://travis-ci.org/spectjs/element-props.svg)](https://travis-ci.org/spectjs/element-props) [![size](https://img.shields.io/bundlephobia/minzip/element-props?label=size)](https://bundlephobia.com/result?p=element-props)
+# element-props <!--[![status](https://travis-ci.org/spectjs/element-props.svg)](https://travis-ci.org/spectjs/element-props)--> [![test](https://github.com/spectjs/element-props/actions/workflows/test.yml/badge.svg)](https://github.com/spectjs/element-props/actions/workflows/test.yml) [![size](https://img.shields.io/bundlephobia/minzip/element-props?label=size)](https://bundlephobia.com/result?p=element-props)
 
 Normalize access to element attributes/properties.
 
