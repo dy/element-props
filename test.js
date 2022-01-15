@@ -274,8 +274,8 @@ t.todo('input: input range')
 t.todo('input: input date')
 t.todo('input: input multiselect')
 
-t('augment', async t => {
-  await import('./augment.js')
+t('polyfill', async t => {
+  await import('./polyfill.js')
 
   let el = document.createElement('div')
   el.id = 'my-element'

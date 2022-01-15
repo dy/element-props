@@ -61,7 +61,7 @@ el.getAttribute('checked') // ''
 
 One may think it’s bad to augment DOM objects, but in controlled setting, eg. custom elements, that’s totally fine.
 
-### augment
+### polyfill
 
 Add `props` to all HTML elements by including augment for `Element.prototype.props`:
 
@@ -72,6 +72,7 @@ document.body.id = 'my-body'
 document.body.props // { id: 'my-body' }
 ```
 
+<!--
 ### obervable
 
 Observable version of props provides a way to track props changes, exposing _observable_ and _asyncIterator_ interfaces:
@@ -92,6 +93,7 @@ el.props[Symbol.observable]().subscribe(props => console.log(props))
 // rxjs/observables + pipes
 el.props |> map(props => console.log(props))
 ```
+-->
 
 ### Convention
 
