@@ -1,5 +1,5 @@
 // polyfill Element.prototype.props
-import props from './index.js'
+import props from './element-props.js'
 
 const cache = new WeakMap
 Object.defineProperty(Element.prototype, 'props', {

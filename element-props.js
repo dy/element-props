@@ -1,6 +1,7 @@
 export default (el, types={}) => {
   // auto-parse pkg in 2 lines (no object/array detection)
   // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
+  // FIXME: make more static. Calling that on getter is hard... Not often though but still
   const typed = ( v, t ) => (
     t = t === Object ? JSON.parse : t === Array ? s => JSON.parse(s[0]==='['?s:`[${s}]`) : t,
     v === '' && t !== String ? true : t ? t(v) : !v || isNaN(+v) ? v : +v
