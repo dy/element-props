@@ -6,8 +6,7 @@
   "module": "element-props.js",
   "type": "module",
   "scripts": {
-    "build": "rollup element-props.js --file element-props.min.js --format esm --name \"element-props\"",
-    "minify": "terser element-props.min.js -o element-props.min.js --module -c passes=3 -m",
+    "build": "terser element-props.js -o element-props.min.js --module -c passes=3 -m",
     "test": "node -r browser-env/register test.js"
   },
   "repository": {
