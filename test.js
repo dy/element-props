@@ -186,6 +186,17 @@ t('function', t => {
   is(log, ['A','b','click'])
 })
 
+t('style', t => {
+  let el = document.createElement('div')
+  el.props = props(el)
+
+  el.props.style = {top:'1px'}
+  is(el.style.top, '1px')
+
+  el.props.style = `top: 2px`
+  is(el.style.top, '2px')
+})
+
 // input
 t.todo('input: play around', async t => {
   let el = document.createElement('input')
