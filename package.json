@@ -1,6 +1,6 @@
 {
   "name": "element-props",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Normalize access to element attributes/properties",
   "main": "element-props.js",
   "module": "element-props.js",
