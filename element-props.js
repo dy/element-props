@@ -1,13 +1,12 @@
-export default (el, types={}) => {
-  // auto-parse pkg in 2 lines (no object/array detection)
-  // Number(n) is fast: https://jsperf.com/number-vs-plus-vs-toint-vs-tofloat/35
-  // FIXME: make more static. Calling that on getter is hard... Not often though but still
-  const typed = ( v, t ) => (
-    t = t === Object ? JSON.parse : t === Array ? s => JSON.parse(s[0]==='['?s:`[${s}]`) : t,
-    v === '' && t !== String ? true : t ? t(v) : !v || isNaN(+v) ? v : +v
-  ),
+// auto-parse pkg in 2 lines (no object/array detection)
+export const parse = ( v, Type ) => (
+  Type = Type === Object ? JSON.parse : Type === Array ? s => JSON.parse(s[0]==='['?s:`[${s}]`) : Type,
+  v === '' && Type !== String ? true : Type ? Type(v) : !v || isNaN(+v) ? v : +v
+)
 
-  proto = el.constructor.prototype,
+export default (el, types={}) => {
+  // FIXME: make more static. Calling that on getter is hard... Not often though but still
+  const proto = el.constructor.prototype,
 
   // inputs
   input = el.tagName === 'INPUT' || el.tagName === 'SELECT',
@@ -28,14 +27,13 @@ export default (el, types={}) => {
       get: (_, k) =>
         input && k === 'value' ? iget() :
         // k === 'children' ? [...el.childNodes] :
-        k in el ? el[k] : a[k] && (a[k].call ? a[k] : typed(a[k].value, types[k])),
+        k in el ? el[k] : a[k] && (a[k].call ? a[k] : parse(a[k].value, types[k])),
       set: (_, k, v, desc) => (
-        // prop(el, k, v,)
         // input case
         input && k === 'value' ? iset(v) :
         (
-          k=k.slice(0,2)==='on'?k.toLowerCase():k, // onClick → onclick
-          v = typed(v, types[k]),
+          k = k.slice(0,2)==='on' ? k.toLowerCase() : k, // onClick → onclick
+          v = parse(v, types[k]),
           el[k] !== v &&
           // avoid readonly props https://jsperf.com/element-own-props-set/1
           (!(k in proto) || !(desc = Object.getOwnPropertyDescriptor(proto, k)) || desc.set) && (el[k] = v),

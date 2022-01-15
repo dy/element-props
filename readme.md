@@ -30,7 +30,7 @@ el.props.onclick = e => ()
 
 ## API
 
-### element.props = props(element, propTypes?)
+### props(element, propTypes?)
 
 Create `props` for an `element`, with optional `propTypes = { propName: Type }`.<br/>
 _Type_ is any data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_, or `string => data` function like _JSON.parse_ (used for _Array_ and _Object_).
@@ -60,6 +60,19 @@ el.getAttribute('checked') // ''
 ```
 
 One may think it’s bad to augment DOM objects, but in controlled setting, eg. custom elements, that’s totally fine.
+
+### parse(string, Type?)
+
+Convert string value into defined type _or_ detect type automatically (tiny _auto-parse_).
+
+```js
+import { parse } from './element-props.js'
+
+parse('true', Boolean) // true
+parse('123') // 123
+parse('1,2,3', Array) // [1, 2, 3]
+parse('{ a: 1, b: 2 }', Object) // { a: 1, b: 2}
+```
 
 ### polyfill
 
