@@ -197,6 +197,14 @@ t('style', t => {
   is(el.style.top, '2px')
 })
 
+t('unknown type', t => {
+  let el = document.createElement('div')
+  el.props = props(el)
+
+  el.props.x = {x:1}
+  is(el.getAttribute('x'), '')
+})
+
 // input
 t.todo('input: play around', async t => {
   let el = document.createElement('input')
@@ -315,6 +323,15 @@ t.todo('input: input radio')
 t.todo('input: input range')
 t.todo('input: input date')
 t.todo('input: input multiselect')
+
+// cases
+t.skip('template parts', t => {
+  let el = document.createElement('div')
+  el.props = props(el)
+  el.props.onclick = '{{ inc() }}'
+  ok(el.onclick)
+  is(el.props.onclick, '{{ inc() }}')
+})
 
 t('polyfill', async t => {
   await import('./polyfill.js')

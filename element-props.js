@@ -15,9 +15,9 @@ prop = (el, k, v, desc) => (
     v === true ? '' :
     typeof v === 'number' || typeof v === 'string' ? v :
     k === 'class' && Array.isArray(v) ? v.filter(Boolean).join(' ') :
-    k === 'style' && v.constructor === Object && (
+    k === 'style' && v.constructor === Object ? (
       k=v, v=Object.values(v), Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')
-    )
+    ) : ''
   )
 )
 
