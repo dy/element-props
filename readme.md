@@ -103,6 +103,7 @@ Inspired by this [tweet](https://twitter.com/WebReflection/status/12609482789774
 
 * [Element properties proposal](https://github.com/developit/unified-element-properties-proposal)
 * [templize](https://github.com/spectjs/templize)
+* [attr-types](https://github.com/qwtel/attr-types)
 
 ## License
 
