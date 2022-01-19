@@ -16,8 +16,14 @@
   "keywords": [
     "element",
     "props",
+    "properties",
     "proptypes",
-    "spectjs"
+    "spectjs",
+    "attr-types",
+    "attribute",
+    "parse-attributes",
+    "attr-type",
+    "attributes"
   ],
   "files": [
     "element-props.js",
