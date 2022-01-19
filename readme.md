@@ -30,9 +30,9 @@ el.props.onclick = e => ()
 
 ## API
 
-### props(element, propTypes?, onchange?)
+### props(element, types?, onchange?)
 
-Create `props` for an `element`, with optional `propTypes = { propName: Type }`.<br/>
+Create `props` for an `element`, with optional `types = { propName: Type }` (compat. with [attr-types](https://github.com/qwtel/attr-types)).<br/>
 _Type_ is any data class like _Number_, _Boolean_, _String_, _Array_, _Object_, _Data_, _RegExp_, or `string => data` function like _JSON.parse_ (used for _Array_ and _Object_).
 
 ```js
