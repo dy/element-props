@@ -39,6 +39,7 @@
   "homepage": "https://github.com/spectjs/element-props#readme",
   "devDependencies": {
     "browser-env": "^3.3.0",
+    "jsdom": "^20.0.2",
     "rollup": "^2.62.0",
     "terser": "^5.10.0",
     "tst": "^7.1.0",

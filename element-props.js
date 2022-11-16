@@ -22,10 +22,10 @@ prop = (el, k, v, desc) => (
 ),
 
 // create input element getter/setter
-input = (el) => (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? [
+input = (el) => [
   (el.type === 'checkbox' ? () => el.checked : () => el.value),
   (
-    el.type === 'text' ? value => el.value = value == null ? '' : value :
+    el.type === 'text' || el.type === '' ? value => (el.value = value == null ? '' : value) :
     el.type === 'checkbox' ? value => (el.value = value ? 'on' : '', prop(el, 'checked', value)) :
     el.type === 'select-one' ? value => (
       [...el.options].map(el => el.removeAttribute('selected')),
@@ -34,20 +34,20 @@ input = (el) => (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? [
     ) :
     value => el.value = value
   )
-] : []
+]
 
 export default (el, types, onchange) => {
-  // FIXME: make more static. Calling that on getter is hard... Not often though but still
   // inputs
-  const [iget, iset] = input(el),
-  p = new Proxy(el.attributes,
-    {
-      get: (a, k) =>
-        iget && k === 'value' ? iget() :
+  const isInput = (el.tagName === 'INPUT' || el.tagName === 'SELECT'),
+    [iget, iset] = input(el),
+    p = new Proxy(el.attributes, {
+      get: (a, k) => (
+        isInput && k === 'value' ? iget() :
         // k === 'children' ? [...el.childNodes] :
-        k in el ? el[k] : a[k] && (a[k].call ? a[k] : parse(a[k].value, types?.[k])),
+        k in el ? el[k] : a[k] && (a[k].call ? a[k] : parse(a[k].value, types?.[k]))
+      ),
       set: (a, k, v) => (
-        iset && k === 'value' ? iset(v) : prop(el, k, parse(v, types?.[k])),
+        isInput && k === 'value' ? iset(v) : prop(el, k, parse(v, types?.[k])),
         onchange?.(k, v, a), 1
       ),
 
@@ -59,11 +59,10 @@ export default (el, types, onchange) => {
         // joined props from element keys and real attributes
         new Set([...Object.keys(el), ...Object.getOwnPropertyNames(a)].filter(k => el[k] !== p && isNaN(+k)))
       )
-    }
-  )
+    })
 
   // normalize initial input.value
-  if (iset) iset(iget())
+  if (isInput) iset(iget())
 
   return p
 }
