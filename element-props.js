@@ -19,31 +19,35 @@ prop = (el, k, v, desc) => (
       k=v, v=Object.values(v), Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')
     ) : ''
   )
-)
+),
 
-export default (el, types, onchange) => {
-  // FIXME: make more static. Calling that on getter is hard... Not often though but still
-  // inputs
-  const input = el.tagName === 'INPUT' || el.tagName === 'SELECT',
-  iget = input && (el.type === 'checkbox' ? () => el.checked : () => el.value),
-  iset = input && (
+// create input element getter/setter
+input = (el) => (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? [
+  (el.type === 'checkbox' ? () => el.checked : () => el.value),
+  (
     el.type === 'text' ? value => el.value = value == null ? '' : value :
-    el.type === 'checkbox' ? value => (el.value = value ? 'on' : '', p.checked = value) :
+    el.type === 'checkbox' ? value => (el.value = value ? 'on' : '', prop(el, 'checked', value)) :
     el.type === 'select-one' ? value => (
       [...el.options].map(el => el.removeAttribute('selected')),
       el.value = value,
       el.selectedOptions[0]?.setAttribute('selected', '')
     ) :
     value => el.value = value
-  ),
+  )
+] : []
+
+export default (el, types, onchange) => {
+  // FIXME: make more static. Calling that on getter is hard... Not often though but still
+  // inputs
+  const [iget, iset] = input(el),
   p = new Proxy(el.attributes,
     {
       get: (a, k) =>
-        input && k === 'value' ? iget() :
+        iget && k === 'value' ? iget() :
         // k === 'children' ? [...el.childNodes] :
         k in el ? el[k] : a[k] && (a[k].call ? a[k] : parse(a[k].value, types?.[k])),
       set: (a, k, v) => (
-        input && k === 'value' ? iset(v) : prop(el, k, parse(v, types?.[k])),
+        iset && k === 'value' ? iset(v) : prop(el, k, parse(v, types?.[k])),
         onchange?.(k, v, a), 1
       ),
 
@@ -59,7 +63,7 @@ export default (el, types, onchange) => {
   )
 
   // normalize initial input.value
-  if (input) iset(iget())
+  if (iset) iset(iget())
 
   return p
 }
