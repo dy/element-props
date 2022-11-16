@@ -78,7 +78,8 @@ Set `key` prop/attribute value depending on value type.
 
 * `on*` property can only be a function.
 * `onEvt` === `onevt`.
-* `style` can only be an object.
+* `style` can only be an object or a string.
+* `class` can be a string, object or a string.
 * `id` can only be a string.
 * Empty strings are considered booleans: `<a disabled />` → `a.props.disabled === true`
 

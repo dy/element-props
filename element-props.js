@@ -5,7 +5,7 @@ export const parse = ( v, Type ) => (
 ),
 
 prop = (el, k, v, desc) => (
-  k = k.slice(0,2)==='on' ? k.toLowerCase() : k, // onClick → onclick
+  k = k.startsWith('on') ? k.toLowerCase() : k, // onClick → onclick
   // avoid readonly props https://jsperf.com/element-own-props-set/1
   el[k] !== v && (
     !(k in el.constructor.prototype) || !(desc = Object.getOwnPropertyDescriptor(el.constructor.prototype, k)) || desc.set
@@ -14,7 +14,7 @@ prop = (el, k, v, desc) => (
   typeof v !== 'function' && el.setAttribute(k,
     v === true ? '' :
     typeof v === 'number' || typeof v === 'string' ? v :
-    k === 'class' && Array.isArray(v) ? v.filter(Boolean).join(' ') :
+    k === 'class' ? (Array.isArray(v) ? v : Object.keys(v).map(k=>v[k]?k:'')).filter(Boolean).join(' ') :
     k === 'style' && v.constructor === Object ? (
       k=v, v=Object.values(v), Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')
     ) : ''

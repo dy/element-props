@@ -18,6 +18,20 @@ t('get/set/spread', t => {
 
   el.props.z = 'def'
   is({...el.props}, { x:2, y:'abc', z:'def', id:"1" })
+
+})
+
+t('class', t => {
+  let el = document.createElement('div')
+  el.props = props(el)
+  el.props.class = ['a','b','c']
+  is(el.className, 'a b c')
+
+  el.props.class = 'a b c d'
+  is(el.className, 'a b c d')
+
+  el.props.class = {a:true, b:false, c:true}
+  is(el.className, 'a c')
 })
 
 t('propTypes', t => {
