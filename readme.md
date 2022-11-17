@@ -73,6 +73,8 @@ Set `key` prop/attribute value depending on value type.
 * `id` can only be a string.
 * Empty strings are considered booleans: `<a disabled />` → `a.props.disabled === true`
 
+CamelCase key name is mapped to dash-case for attribute.
+
 ### [get, set] = input(el)
 
 Create getter/setter for an input depending on element type.

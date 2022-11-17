@@ -21,19 +21,6 @@ t('get/set/spread', t => {
 
 })
 
-t('class', t => {
-  let el = document.createElement('div')
-  el.props = props(el)
-  el.props.class = ['a','b','c']
-  is(el.className, 'a b c')
-
-  el.props.class = 'a b c d'
-  is(el.className, 'a b c d')
-
-  el.props.class = {a:true, b:false, c:true}
-  is(el.className, 'a c')
-})
-
 t('propTypes', t => {
   let el = document.createElement('div')
 
@@ -169,7 +156,8 @@ t('set function, get function', t => {
   is(log, [1, 2])
 })
 
-t('readonly attribs', t => {
+t.skip('readonly attribs', t => {
+  // SKIPPING: it's fine to throw error for users
   let f = document.createElement('form')
   f.id = 'x'
   f.innerHTML = '<button/>'
@@ -211,6 +199,31 @@ t('style', t => {
   is(el.style.top, '2px')
 })
 
+t('class', t => {
+  let el = document.createElement('div')
+  el.props = props(el)
+  el.props.class = ['a','b','c']
+  is(el.className, 'a b c')
+
+  el.props.class = 'a b c d'
+  is(el.className, 'a b c d')
+
+  el.props.class = {a:true, b:false, c:true}
+  is(el.className, 'a c')
+})
+
+t('capNames', t => {
+  let el = document.createElement('div')
+  el.props = props(el)
+
+  el.props.someProp = 'x'
+  is(el.props.someProp, 'x')
+  is(el.getAttribute('some-prop'), 'x')
+
+  el.setAttribute('some-other-prop', 'y')
+  is(el.props.someOtherProp, 'y')
+})
+
 t('unknown type', t => {
   let el = document.createElement('div')
   el.props = props(el)
@@ -220,24 +233,6 @@ t('unknown type', t => {
 })
 
 // input
-t.todo('input: play around', async t => {
-  let el = document.createElement('input')
-  document.body.appendChild(el)
-  el.props = props(el)
-  el.props[Symbol.observable]().subscribe(v => console.log(v))
-
-  let cb = document.createElement('input')
-  cb.setAttribute('type', 'checkbox')
-  document.body.appendChild(cb)
-  let bool = i(cb)
-  bool(v => console.log(v))
-
-  let sel = document.createElement('select')
-  sel.innerHTML = `<option value=1>A</option><option value=2>B</option>`
-  document.body.appendChild(sel)
-  let enm = i(sel)
-  enm(v => console.log(v))
-})
 t.skip('input: notifies direct changing value', async t => {
   let el = document.createElement('input')
   el.props = props(el)

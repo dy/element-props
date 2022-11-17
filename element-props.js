@@ -4,22 +4,26 @@ export const parse = ( v, Type ) => (
   v === '' && Type !== String ? true : Type ? Type(v) : !v || isNaN(+v) ? v : +v
 ),
 
-prop = (el, k, v, desc) => (
-  k = k.startsWith('on') ? k.toLowerCase() : k, // onClick → onclick
-  // avoid readonly props https://jsperf.com/element-own-props-set/1
-  el[k] !== v && (
-    !(k in el.constructor.prototype) || !(desc = Object.getOwnPropertyDescriptor(el.constructor.prototype, k)) || desc.set
-  ) && (el[k] = v),
-  v === false || v == null ? el.removeAttribute(k) :
-  typeof v !== 'function' && el.setAttribute(k,
+prop = (el, k, v) => {
+  // onClick → onclick, someProp -> some-prop
+  if (k.startsWith('on')) k = k.toLowerCase()
+
+  if (el[k] !== v) {
+    // avoid readonly props https://jsperf.com/element-own-props-set/1
+    // ignoring that: it's too heavy, same time it's fine to throw error for users to avoid setting form
+    // let desc; if (!(k in el.constructor.prototype) || !(desc = Object.getOwnPropertyDescriptor(el.constructor.prototype, k)) || desc.set)
+    el[k] = v;
+  }
+
+  if (v === false || v == null) el.removeAttribute(k)
+  else if (typeof v !== 'function') el.setAttribute(dashcase(k),
     v === true ? '' :
-    typeof v === 'number' || typeof v === 'string' ? v :
-    k === 'class' ? (Array.isArray(v) ? v : Object.keys(v).map(k=>v[k]?k:'')).filter(Boolean).join(' ') :
-    k === 'style' && v.constructor === Object ? (
-      k=v, v=Object.values(v), Object.keys(k).map((k,i) => `${k}: ${v[i]};`).join(' ')
-    ) : ''
+    (typeof v === 'number' || typeof v === 'string') ? v :
+    (k === 'class') ? (Array.isArray(v) ? v : Object.entries(v).map(([k,v])=>v?k:'')).filter(Boolean).join(' ') :
+    (k === 'style') ? Object.entries(v).map(([k,v]) => `${k}: ${v}`).join(';') :
+    ''
   )
-),
+},
 
 // create input element getter/setter
 input = (el) => [
@@ -41,28 +45,36 @@ export default (el, types, onchange) => {
   const isInput = (el.tagName === 'INPUT' || el.tagName === 'SELECT'),
     [iget, iset] = input(el),
     p = new Proxy(el.attributes, {
-      get: (a, k) => (
+      get: (attrs, k, attr) => (
         isInput && k === 'value' ? iget() :
         // k === 'children' ? [...el.childNodes] :
-        k in el ? el[k] : a[k] && (a[k].call ? a[k] : parse(a[k].value, types?.[k]))
+        k in el ? el[k] : (attr = attrs[dashcase(k)], attr && (attr.call ? attr : parse(attr.value, types?.[k])))
       ),
-      set: (a, k, v) => (
+      set: (attrs, k, v) => (
         isInput && k === 'value' ? iset(v) : prop(el, k, parse(v, types?.[k])),
-        onchange?.(k, v, a), 1
+        onchange?.(k, v, attrs), 1
       ),
 
-      deleteProperty: (a,k,u) => (el.removeAttribute(k), el[k]=u, delete el[k]), // events cannot be deleted, but have to be nullified
+      deleteProperty: (_,k,u) => (el.removeAttribute(k), el[k]=u, delete el[k]), // events cannot be deleted, but have to be nullified
 
       // spread https://github.com/tc39/proposal-object-rest-spread/issues/69#issuecomment-633232470
       getOwnPropertyDescriptor: a => ({ enumerable: true, configurable: true }),
-      ownKeys: a => Array.from(
+      ownKeys: attrs => Array.from(
         // joined props from element keys and real attributes
-        new Set([...Object.keys(el), ...Object.getOwnPropertyNames(a)].filter(k => el[k] !== p && isNaN(+k)))
+        new Set([...Object.keys(el), ...Object.getOwnPropertyNames(attrs)].filter(k => el[k] !== p && isNaN(+k)))
       )
-    })
+    });
 
   // normalize initial input.value
   if (isInput) iset(iget())
 
   return p
+}
+
+const el = document.createElement('div')
+const dashcase = (str) => {
+  el.dataset[str] = ''
+  let dashStr = el.attributes[0].name.slice(5)
+  delete el.dataset[str]
+  return dashStr
 }
