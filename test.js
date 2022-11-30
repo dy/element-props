@@ -53,6 +53,13 @@ t('non-attr props', t => {
   is({...el.props}, {x: 1, y: 1})
 })
 
+t('special attr names', t => {
+  let el = document.createElement('div')
+  el.props = props(el)
+  el.props[':x-y'] = 1
+  is(el.props[':x-y'], 1)
+})
+
 t('onchange event', async t => {
   let el = document.createElement('div')
   let log = []
@@ -357,7 +364,7 @@ t('polyfill', async t => {
   el.setAttribute('y', '')
   is(el.props.y, true)
   el.props.y = false
-  is(el.getAttribute('y'), null)
+  is(el.getAttribute('y'), 'false')
 
   // spread 👌
   is({...el.props}, { x: 1, y: false, id: 'my-element' })

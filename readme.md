@@ -19,6 +19,8 @@ props.x // 1
 el.setAttribute('disabled', '')
 props.disabled // true
 props.disabled = false
+el.getAttribute('disabled') // 'false'
+props.disabled = null
 el.getAttribute('disabled') // null
 
 // functions

@@ -15,9 +15,9 @@ prop = (el, k, v) => {
     el[k] = v;
   }
 
-  if (v === false || v == null) el.removeAttribute(k)
+  if (v == null) el.removeAttribute(k)
   else if (typeof v !== 'function') el.setAttribute(dashcase(k),
-    v === true ? '' :
+    v === true ? '' : v === false ? 'false' :
     (typeof v === 'number' || typeof v === 'string') ? v :
     (k === 'class') ? (Array.isArray(v) ? v : Object.entries(v).map(([k,v])=>v?k:'')).filter(Boolean).join(' ') :
     (k === 'style') ? Object.entries(v).map(([k,v]) => `${k}: ${v}`).join(';') :
@@ -30,7 +30,7 @@ input = (el) => [
   (el.type === 'checkbox' ? () => el.checked : () => el.value),
   (
     el.type === 'text' || el.type === '' ? value => (el.value = value == null ? '' : value) :
-    el.type === 'checkbox' ? value => (el.value = value ? 'on' : '', prop(el, 'checked', value)) :
+    el.type === 'checkbox' ? value => (el.value = value ? 'on' : '', prop(el, 'checked', value==false?null:value)) :
     el.type === 'select-one' ? value => (
       [...el.options].map(el => el.removeAttribute('selected')),
       el.value = value,
@@ -72,9 +72,7 @@ export default (el, types, onchange) => {
 }
 
 const el = document.createElement('div')
-const dashcase = (str) => {
-  el.dataset[str] = ''
-  let dashStr = el.attributes[0].name.slice(5)
-  delete el.dataset[str]
-  return dashStr
-}
+
+function dashcase(str) {
+	return str.replace(/[A-Z\u00C0-\u00D6\u00D8-\u00DE]/g, (match) => '-' + match.toLowerCase());
+};
