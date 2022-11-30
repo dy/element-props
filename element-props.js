@@ -15,9 +15,9 @@ prop = (el, k, v) => {
     el[k] = v;
   }
 
-  if (v == null) el.removeAttribute(k)
+  if (v == null || v === false) el.removeAttribute(k)
   else if (typeof v !== 'function') el.setAttribute(dashcase(k),
-    v === true ? '' : v === false ? 'false' :
+    v === true ? '' :
     (typeof v === 'number' || typeof v === 'string') ? v :
     (k === 'class') ? (Array.isArray(v) ? v : Object.entries(v).map(([k,v])=>v?k:'')).filter(Boolean).join(' ') :
     (k === 'style') ? Object.entries(v).map(([k,v]) => `${k}: ${v}`).join(';') :
@@ -30,7 +30,7 @@ input = (el) => [
   (el.type === 'checkbox' ? () => el.checked : () => el.value),
   (
     el.type === 'text' || el.type === '' ? value => (el.value = value == null ? '' : value) :
-    el.type === 'checkbox' ? value => (el.value = value ? 'on' : '', prop(el, 'checked', value==false?null:value)) :
+    el.type === 'checkbox' ? value => (el.value = value ? 'on' : '', prop(el, 'checked', value)) :
     el.type === 'select-one' ? value => (
       [...el.options].map(el => el.removeAttribute('selected')),
       el.value = value,

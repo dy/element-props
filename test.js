@@ -364,7 +364,7 @@ t('polyfill', async t => {
   el.setAttribute('y', '')
   is(el.props.y, true)
   el.props.y = false
-  is(el.getAttribute('y'), 'false')
+  is(el.getAttribute('y'), null)
 
   // spread 👌
   is({...el.props}, { x: 1, y: false, id: 'my-element' })
