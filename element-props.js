@@ -19,9 +19,8 @@ prop = (el, k, v) => {
   else if (typeof v !== 'function') el.setAttribute(dashcase(k),
     v === true ? '' :
     (typeof v === 'number' || typeof v === 'string') ? v :
-    (k === 'class') ? (Array.isArray(v) ? v : Object.entries(v).map(([k,v])=>v?k:'')).filter(Boolean).join(' ') :
-    (k === 'style') ? Object.entries(v).map(([k,v]) => `${k}: ${v}`).join(';') :
-    v.toString?.() || ''
+    (k === 'class') ? (Array.isArray(v) ? v.map(v=>v?.trim()) : Object.entries(v).map(([k,v])=>v?k:'')).filter(Boolean).join(' ') :
+    (k === 'style') ? Object.entries(v).map(([k,v]) => `${k}: ${v}`).join(';') : v.toString?.()||''
   )
 },
 
