@@ -19,6 +19,13 @@ t('get/set/spread', t => {
   el.props.z = 'def'
   is({...el.props}, { x:2, y:'abc', z:'def', id:"1" })
 
+  el.props.w = new String('ghi')
+  is({...el.props}, { x:2, y:'abc', z:'def', id:"1", w:"ghi" })
+  is(el.getAttribute('w'), 'ghi')
+
+  el.props.v = Object.assign(['i','j','k'],{toString(){return this.join('')}})
+  is({...el.props}, { x:2, y:'abc', z:'def', id:"1", w:"ghi", v:"ijk" })
+  is(el.getAttribute('v'), 'ijk')
 })
 
 t('propTypes', t => {
@@ -236,7 +243,7 @@ t('unknown type', t => {
   el.props = props(el)
 
   el.props.x = {x:1}
-  is(el.getAttribute('x'), '')
+  is(el.getAttribute('x'), '[object Object]')
 })
 
 // input

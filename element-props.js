@@ -21,7 +21,7 @@ prop = (el, k, v) => {
     (typeof v === 'number' || typeof v === 'string') ? v :
     (k === 'class') ? (Array.isArray(v) ? v : Object.entries(v).map(([k,v])=>v?k:'')).filter(Boolean).join(' ') :
     (k === 'style') ? Object.entries(v).map(([k,v]) => `${k}: ${v}`).join(';') :
-    ''
+    v.toString?.() || ''
   )
 },
 
