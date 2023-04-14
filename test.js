@@ -238,6 +238,15 @@ t('capNames', t => {
   is(el.props.someOtherProp, 'y')
 })
 
+t('@ attr', t => {
+  let el = document.createElement('div')
+  el.props = props(el)
+
+  el.props['@x'] = 'x'
+  is(el.props['@x'], 'x')
+  is(el.getAttribute('@x'), 'x')
+})
+
 t('unknown type', t => {
   let el = document.createElement('div')
   el.props = props(el)
